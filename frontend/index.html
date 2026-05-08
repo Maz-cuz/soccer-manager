@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midvaalens YD | Team Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Midvaalens YD</h1>
+            <p class="subtitle">Youth Development | Team Management System</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="players">👥 Players</button>
+            <button class="tab-btn" data-tab="fixtures">📅 Fixtures</button>
+            <button class="tab-btn" data-tab="stats">📊 Statistics</button>
+            <button class="tab-btn" data-tab="payments">💰 Payments</button>
+        </div>
+
+        <!-- ========== TAB 1: PLAYERS ========== -->
+        <div id="playersTab" class="tab-content active">
+            <div class="card">
+                <h2>➕ Add New Player</h2>
+                <div class="form-row">
+                    <input type="text" id="playerName" placeholder="Full name" />
+                    <input type="text" id="playerJersey" placeholder="Jersey #" />
+                    <input type="text" id="playerPosition" placeholder="Position" />
+                    <input type="file" id="playerPhoto" accept="image/*" />
+                    <button id="addPlayerBtn">Add Player</button>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="stat-card">👥 Total Players: <span id="totalPlayers">0</span></div>
+                <div class="stat-card">✅ Today's Attendance: <span id="todayAttendance">0</span></div>
+                <div class="stat-card">💪 Fit Players: <span id="fitCount">0</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 Player Management</h2>
+                    <div>
+                        <button id="markAllPresentBtn">✅ Mark All Present</button>
+                        <button id="exportStatsCSVBtn">📥 Export Stats CSV</button>
+                        <button id="sendReportBtn">📧 Send Report</button>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table id="playerTable">
+                        <thead>
+                            <tr><th>Photo</th><th>Name</th><th>Jersey</th><th>Position</th><th>Fitness</th><th>Today</th><th>Last 5</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="playerTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 2: FIXTURES ========== -->
+        <div id="fixturesTab" class="tab-content">
+            <div class="card">
+                <h2>➕ Add New Fixture</h2>
+                <div class="form-row">
+                    <input type="text" id="fixtureOpponent" placeholder="Opponent team" />
+                    <input type="date" id="fixtureDate" />
+                    <select id="fixtureVenue">
+                        <option value="Home">Home</option>
+                        <option value="Away">Away</option>
+                    </select>
+                    <input type="text" id="fixtureLocation" placeholder="Venue name" />
+                    <button id="addFixtureBtn">Add Fixture</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📅 Upcoming Matches</h2>
+                <div id="upcomingFixtures" class="fixtures-list"></div>
+            </div>
+
+            <div class="card">
+                <h2>📜 Past Fixtures & Results</h2>
+                <div id="pastFixtures" class="fixtures-list"></div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 3: STATISTICS ========== -->
+        <div id="statsTab" class="tab-content">
+            <div class="dashboard">
+                <div class="stat-card">⭐ Top Goalscorer: <span id="topScorer">-</span></div>
+                <div class="stat-card">🏆 Top Rating: <span id="topRated">-</span></div>
+                <div class="stat-card">📊 Total Goals: <span id="totalGoals">0</span></div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Player Statistics (Season)</h2>
+                <div style="overflow-x: auto;">
+                    <table id="statsTable">
+                        <thead>
+                            <tr><th>Player</th><th>Apps</th><th>Goals</th><th>Assists</th><th>Avg Rating</th><th>Cards</th></tr>
+                        </thead>
+                        <tbody id="statsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 4: PAYMENTS ========== -->
+        <div id="paymentsTab" class="tab-content">
+            <div class="card">
+                <h2>💰 Monthly Payments (R70)</h2>
+                <p>Current month: <strong id="paymentMonth"></strong></p>
+                <div id="paymentsSummary" class="payments-summary"></div>
+                <div id="paymentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Recording Match Stats -->
+    <div id="matchStatsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>📝 Record Match Stats</h2>
+            <h3 id="modalMatchInfo"></h3>
+            <div id="matchStatsForm"></div>
+            <button id="saveMatchStatsBtn">Save Statistics</button>
+        </div>
+    </div>
+
+    <!-- Modal for WhatsApp/Email Report -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-report">&times;</span>
+            <h2>📧 Send Match Report</h2>
+            <div class="form-row">
+                <select id="reportFixtureSelect">
+                    <option value="">Select fixture...</option>
+                </select>
+                <select id="reportMethod">
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="email">Email</option>
+                </select>
+                <input type="text" id="reportRecipient" placeholder="Phone number or email" />
+                <button id="sendReportBtnModal">Send Report</button>
+            </div>
+            <div id="reportPreview" class="report-preview"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
