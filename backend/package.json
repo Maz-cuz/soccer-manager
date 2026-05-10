@@ -1,13 +1,14 @@
 {
-  "name": "midvaalens-yd-backend",
+  "name": "soccer-manager",
   "version": "1.0.0",
-  "description": "Midvaalens YD Team Management Backend",
-  "main": "server.js",
+  "main": "backend/server.js",
   "scripts": {
-      "start": "node server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
   },
   "dependencies": {
-      "express": "^4.18.2",
-      "cors": "^2.8.5"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2"
   }
 }

@@ -7,37 +7,19 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.static('public'));
+app.use(express.json());
 
-// In-memory storage (for demo - use PostgreSQL for production)
-let players = [];
-let fixtures = [];
+// Serve frontend files (go up one level from backend folder)
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Routes
-app.get('/api/players', (req, res) => {
-    res.json(players);
+// API routes (if you have them)
+// app.use('/api/users', require('./routes/users'));
+
+// Serve index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
 
-app.post('/api/players', (req, res) => {
-    players = req.body;
-    res.json({ success: true });
-});
-
-app.get('/api/fixtures', (req, res) => {
-    res.json(fixtures);
-});
-
-app.post('/api/fixtures', (req, res) => {
-    fixtures = req.body;
-    res.json({ success: true });
-});
-
-// Serve frontend
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
 });
