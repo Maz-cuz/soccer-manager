@@ -1,43 +1,43 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
-
-dotenv.config();
+const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // For photo base64
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static('public'));
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const playerRoutes = require('./routes/players');
-const fixtureRoutes = require('./routes/fixtures');
-const statsRoutes = require('./routes/stats');
-const paymentRoutes = require('./routes/payments');
+// In-memory storage (for demo - use PostgreSQL for production)
+let players = [];
+let fixtures = [];
 
-// Use routes
-app.use('/api/auth', authRoutes);
-app.use('/api/players', playerRoutes);
-app.use('/api/fixtures', fixtureRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/payments', paymentRoutes);
-
-// Root route
-app.get('/', (req, res) => {
-    res.json({ message: '🏆 Midvaalens YD API is running!' });
+// Routes
+app.get('/api/players', (req, res) => {
+    res.json(players);
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch(err => console.error('❌ MongoDB connection error:', err));
+app.post('/api/players', (req, res) => {
+    players = req.body;
+    res.json({ success: true });
+});
 
-// Start server
-const PORT = process.env.PORT || 5000;
+app.get('/api/fixtures', (req, res) => {
+    res.json(fixtures);
+});
+
+app.post('/api/fixtures', (req, res) => {
+    fixtures = req.body;
+    res.json({ success: true });
+});
+
+// Serve frontend
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const Player = require('../models/Player');
+const Fixture = require('../models/Fixture');
 
 router.get('/', auth, async (req, res) => {
     try {
-        const players = await Player.find({ userId: req.user.id });
-        res.json(players);
+        const fixtures = await Fixture.find({ userId: req.user.id }).sort({ date: 1 });
+        res.json(fixtures);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -14,9 +14,9 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
     try {
-        const player = new Player({ ...req.body, userId: req.user.id });
-        await player.save();
-        res.json(player);
+        const fixture = new Fixture({ ...req.body, userId: req.user.id });
+        await fixture.save();
+        res.json(fixture);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -24,12 +24,12 @@ router.post('/', auth, async (req, res) => {
 
 router.put('/:id', auth, async (req, res) => {
     try {
-        const player = await Player.findOneAndUpdate(
+        const fixture = await Fixture.findOneAndUpdate(
             { _id: req.params.id, userId: req.user.id },
             req.body,
             { new: true }
         );
-        res.json(player);
+        res.json(fixture);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -37,8 +37,8 @@ router.put('/:id', auth, async (req, res) => {
 
 router.delete('/:id', auth, async (req, res) => {
     try {
-        await Player.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-        res.json({ message: 'Player deleted' });
+        await Fixture.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+        res.json({ message: 'Fixture deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

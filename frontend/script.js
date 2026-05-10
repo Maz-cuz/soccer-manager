@@ -1,42 +1,184 @@
+// ========== ROLE BASED ACCESS CONTROL WITH LOGIN ==========
+let currentRole = null; // 'admin' or 'client'
+
+// Login handler - call this first
+function initLogin() {
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            const selectedRole = document.getElementById('roleSelect').value;
+            const enteredPassword = document.getElementById('adminPassword').value;
+            const ADMIN_PASSWORD = "admin123";
+            
+            if (selectedRole === 'admin') {
+                if (enteredPassword === ADMIN_PASSWORD) {
+                    currentRole = 'admin';
+                    hideLoginAndStartApp();
+                } else {
+                    alert('Wrong admin password!');
+                }
+            } else {
+                currentRole = 'client';
+                hideLoginAndStartApp();
+            }
+        });
+    }
+}
+
+function hideLoginAndStartApp() {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    updateRoleBadge();
+    loadData();
+}
+
+function logout() {
+    currentRole = null;
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('roleSelect').value = 'admin';
+}
+
+// Check if user can edit
+function canEdit() {
+    return currentRole === 'admin';
+}
+
+// Update role badge in UI
+function updateRoleBadge() {
+    const badge = document.getElementById('roleBadge');
+    if (badge) {
+        if (canEdit()) {
+            badge.innerHTML = '👑 Admin Mode - Full Access';
+            badge.className = 'role-badge role-admin';
+        } else {
+            badge.innerHTML = '👁️ Client Mode - View Only';
+            badge.className = 'role-badge role-client';
+        }
+    }
+    
+    // Show/hide readonly warning
+    const warning = document.getElementById('readonlyWarning');
+    if (warning) {
+        warning.style.display = canEdit() ? 'none' : 'block';
+    }
+}
+
 // ========== DATA STRUCTURE ==========
 let players = [];
 let fixtures = [];
 let currentSessionDate = new Date().toISOString().split('T')[0];
 
-// ========== LOAD/SAVE ==========
+// ========== LOAD/SAVE WITH DEBUG ==========
 function loadData() {
-    const storedPlayers = localStorage.getItem('midvaalensPlayers');
-    const storedFixtures = localStorage.getItem('midvaalensFixtures');
-    players = storedPlayers ? JSON.parse(storedPlayers) : [];
-    fixtures = storedFixtures ? JSON.parse(storedFixtures) : [];
-    render();
+    try {
+        const storedPlayers = localStorage.getItem('midvaalensPlayers');
+        const storedFixtures = localStorage.getItem('midvaalensFixtures');
+        
+        players = storedPlayers ? JSON.parse(storedPlayers) : [];
+        fixtures = storedFixtures ? JSON.parse(storedFixtures) : [];
+        
+        // Add sample data if empty
+        if (players.length === 0) {
+            players = [
+                { id: 1, name: "Thabo Nkosi", jersey: "10", position: "Forward", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() },
+                { id: 2, name: "Sipho Dlamini", jersey: "5", position: "Defender", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() },
+                { id: 3, name: "Lerato Molefe", jersey: "7", position: "Midfielder", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() }
+            ];
+            saveData();
+        }
+        
+        if (fixtures.length === 0) {
+            const today = new Date().toISOString().split('T')[0];
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            const lastWeek = new Date();
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            fixtures = [
+                { id: 1, opponent: "Sundowns FC", date: lastWeek.toISOString().split('T')[0], venue: "Home", location: "Midvaal Stadium", isCompleted: true, result: { homeScore: 2, awayScore: 1 }, matchStatsRecorded: true },
+                { id: 2, opponent: "Chiefs United", date: today, venue: "Away", location: "FNB Stadium", isCompleted: false, result: null, matchStatsRecorded: false },
+                { id: 3, opponent: "Pirates Academy", date: nextWeek.toISOString().split('T')[0], venue: "Home", location: "Midvaal Stadium", isCompleted: false, result: null, matchStatsRecorded: false }
+            ];
+            saveData();
+        }
+        
+        console.log('✅ Loaded players:', players.length);
+        console.log('✅ Loaded fixtures:', fixtures.length);
+        
+        render();
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+        players = [];
+        fixtures = [];
+    }
 }
 
 function saveData() {
-    localStorage.setItem('midvaalensPlayers', JSON.stringify(players));
-    localStorage.setItem('midvaalensFixtures', JSON.stringify(fixtures));
+    try {
+        localStorage.setItem('midvaalensPlayers', JSON.stringify(players));
+        localStorage.setItem('midvaalensFixtures', JSON.stringify(fixtures));
+        console.log('💾 Saved players:', players.length);
+        return true;
+    } catch (error) {
+        console.error('❌ Error saving data:', error);
+        alert('Error saving data. Your browser may have storage limits.');
+        return false;
+    }
 }
 
 // ========== PLAYER CRUD ==========
 function addPlayer(name, jersey, position, photoBase64 = null) {
-    if (!name.trim()) return alert('Name required');
+    console.log('📝 Adding player:', name);
+    
+    if (!name || !name.trim()) {
+        alert('Player name is required!');
+        return false;
+    }
+    
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot add players.');
+        return false;
+    }
+    
     const newPlayer = {
         id: Date.now(),
         name: name.trim(),
-        jersey: jersey.trim(),
-        position: position.trim(),
+        jersey: jersey.trim() || 'N/A',
+        position: position.trim() || 'N/A',
         fitness: 'fit',
         attendance: {},
         payments: {},
         matchStats: {},
-        photo: photoBase64
+        photo: photoBase64,
+        createdAt: new Date().toISOString()
     };
+    
     players.push(newPlayer);
-    saveData();
-    render();
+    const saved = saveData();
+    if (saved) {
+        render();
+        console.log('✅ Player added successfully. Total:', players.length);
+    }
+    
+    // Clear form inputs
+    document.getElementById('playerName').value = '';
+    document.getElementById('playerJersey').value = '';
+    document.getElementById('playerPosition').value = '';
+    if (document.getElementById('playerPhoto')) {
+        document.getElementById('playerPhoto').value = '';
+    }
+    
+    return true;
 }
 
 function deletePlayer(playerId) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot delete players.');
+        return;
+    }
+    
     if (confirm('Are you sure you want to delete this player?')) {
         players = players.filter(p => p.id !== playerId);
         saveData();
@@ -45,6 +187,11 @@ function deletePlayer(playerId) {
 }
 
 function editPlayer(playerId, updatedData) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot edit players.');
+        return;
+    }
+    
     const player = players.find(p => p.id === playerId);
     if (player) {
         Object.assign(player, updatedData);
@@ -54,6 +201,8 @@ function editPlayer(playerId, updatedData) {
 }
 
 function updateFitness(playerId, fitness) {
+    if (!canEdit()) return;
+    
     const player = players.find(p => p.id === playerId);
     if (player) {
         player.fitness = fitness;
@@ -63,6 +212,11 @@ function updateFitness(playerId, fitness) {
 }
 
 function markAttendance(playerId, status) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot mark attendance.');
+        return;
+    }
+    
     const player = players.find(p => p.id === playerId);
     if (player) {
         if (!player.attendance) player.attendance = {};
@@ -73,6 +227,11 @@ function markAttendance(playerId, status) {
 }
 
 function markAllPresent() {
+    if (!canEdit()) {
+        alert('You are in view-only mode.');
+        return;
+    }
+    
     players.forEach(player => {
         if (!player.attendance) player.attendance = {};
         player.attendance[currentSessionDate] = 'present';
@@ -89,7 +248,13 @@ function getLast5Attendance(player) {
 
 // ========== FIXTURE CRUD ==========
 function addFixture(opponent, date, venue, location) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot add fixtures.');
+        return;
+    }
+    
     if (!opponent || !date) return alert('Opponent and date required');
+    
     const newFixture = {
         id: Date.now(),
         opponent: opponent,
@@ -107,8 +272,12 @@ function addFixture(opponent, date, venue, location) {
 }
 
 function deleteFixture(fixtureId) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot delete fixtures.');
+        return;
+    }
+    
     if (confirm('Delete this fixture? This will also remove all match stats.')) {
-        // Remove match stats linked to this fixture
         players.forEach(player => {
             if (player.matchStats && player.matchStats[fixtureId]) {
                 delete player.matchStats[fixtureId];
@@ -122,6 +291,8 @@ function deleteFixture(fixtureId) {
 }
 
 function editFixture(fixtureId, updatedData) {
+    if (!canEdit()) return;
+    
     const fixture = fixtures.find(f => f.id === fixtureId);
     if (fixture) {
         Object.assign(fixture, updatedData);
@@ -131,6 +302,8 @@ function editFixture(fixtureId, updatedData) {
 }
 
 function editFixturePrompt(fixtureId) {
+    if (!canEdit()) return;
+    
     const fixture = fixtures.find(f => f.id === fixtureId);
     if (!fixture) return;
     
@@ -149,18 +322,13 @@ function editFixturePrompt(fixtureId) {
     }
 }
 
-function completeFixture(fixtureId, homeScore, awayScore) {
-    const fixture = fixtures.find(f => f.id === fixtureId);
-    if (fixture) {
-        fixture.isCompleted = true;
-        fixture.result = { homeScore, awayScore };
-        saveData();
-        renderFixtures();
-    }
-}
-
 // ========== MATCH STATISTICS ==========
 function recordMatchStats(fixtureId, statsData) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot record stats.');
+        return;
+    }
+    
     const fixture = fixtures.find(f => f.id === fixtureId);
     if (!fixture) return;
     
@@ -211,6 +379,11 @@ function hasPaidCurrentMonth(player) {
 }
 
 function markPayment(playerId) {
+    if (!canEdit()) {
+        alert('You are in view-only mode. Cannot record payments.');
+        return;
+    }
+    
     const player = players.find(p => p.id === playerId);
     if (player) {
         if (!player.payments) player.payments = {};
@@ -249,7 +422,7 @@ function exportStatsToCSV() {
     URL.revokeObjectURL(url);
 }
 
-// ========== SEND REPORT (WhatsApp/Email) ==========
+// ========== SEND REPORT ==========
 function generateMatchReport(fixtureId) {
     const fixture = fixtures.find(f => f.id === fixtureId);
     if (!fixture) return 'No fixture selected';
@@ -309,7 +482,7 @@ function sendReport() {
         window.open(emailUrl, '_blank');
     }
     
-    alert('Report sent! Check your WhatsApp/Email app.');
+    alert('Report sent! Check your app.');
 }
 
 // ========== RENDER FUNCTIONS ==========
@@ -338,10 +511,6 @@ function renderPlayers() {
             const img = document.createElement('img');
             img.src = player.photo;
             img.className = 'player-photo';
-            img.style.width = '40px';
-            img.style.height = '40px';
-            img.style.borderRadius = '50%';
-            img.style.objectFit = 'cover';
             photoCell.appendChild(img);
         } else {
             photoCell.innerHTML = '📸';
@@ -353,53 +522,63 @@ function renderPlayers() {
         
         // Fitness dropdown
         const fitnessCell = row.insertCell(4);
-        const select = document.createElement('select');
-        select.className = `fitness-select fitness-${player.fitness}`;
-        ['fit', 'doubtful', 'unfit'].forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
-            if (player.fitness === opt) option.selected = true;
-            select.appendChild(option);
-        });
-        select.onchange = (e) => updateFitness(player.id, e.target.value);
-        fitnessCell.appendChild(select);
+        if (canEdit()) {
+            const select = document.createElement('select');
+            select.className = `fitness-select fitness-${player.fitness}`;
+            ['fit', 'doubtful', 'unfit'].forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+                if (player.fitness === opt) option.selected = true;
+                select.appendChild(option);
+            });
+            select.onchange = (e) => updateFitness(player.id, e.target.value);
+            fitnessCell.appendChild(select);
+        } else {
+            fitnessCell.innerHTML = `<span class="fitness-${player.fitness}" style="padding:0.3rem 0.6rem;border-radius:0.3rem;">${player.fitness}</span>`;
+        }
         
-        row.insertCell(5).innerHTML = todayStatus === 'present' ? '✅ Present' : todayStatus === 'absent' ? '❌ Absent' : '⚪';
+        row.insertCell(5).innerHTML = todayStatus === 'present' ? '✅ Present' : todayStatus === 'absent' ? '❌ Absent' : '⚪ Not marked';
         row.insertCell(6).innerHTML = `<span class="attendance-history">${historyDisplay || '⬜⬜⬜⬜⬜'}</span>`;
         
         const actionCell = row.insertCell(7);
-        const presentBtn = document.createElement('button');
-        presentBtn.innerText = '✅';
-        presentBtn.className = 'attendance-btn';
-        presentBtn.title = 'Mark Present';
-        presentBtn.onclick = () => markAttendance(player.id, 'present');
-        
-        const absentBtn = document.createElement('button');
-        absentBtn.innerText = '❌';
-        absentBtn.className = 'attendance-btn absent';
-        absentBtn.title = 'Mark Absent';
-        absentBtn.onclick = () => markAttendance(player.id, 'absent');
-        
-        const editBtn = document.createElement('button');
-        editBtn.innerText = '✏️';
-        editBtn.className = 'edit-btn';
-        editBtn.title = 'Edit Player';
-        editBtn.onclick = () => {
-            const newName = prompt('Edit name:', player.name);
-            if (newName) editPlayer(player.id, { name: newName });
-        };
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerText = '🗑️';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.title = 'Delete Player';
-        deleteBtn.onclick = () => deletePlayer(player.id);
-        
-        actionCell.appendChild(presentBtn);
-        actionCell.appendChild(absentBtn);
-        actionCell.appendChild(editBtn);
-        actionCell.appendChild(deleteBtn);
+        if (canEdit()) {
+            const presentBtn = document.createElement('button');
+            presentBtn.innerText = '✅';
+            presentBtn.className = 'attendance-btn';
+            presentBtn.title = 'Mark Present';
+            presentBtn.onclick = () => markAttendance(player.id, 'present');
+            
+            const absentBtn = document.createElement('button');
+            absentBtn.innerText = '❌';
+            absentBtn.className = 'attendance-btn absent';
+            absentBtn.title = 'Mark Absent';
+            absentBtn.onclick = () => markAttendance(player.id, 'absent');
+            
+            const editBtn = document.createElement('button');
+            editBtn.innerText = '✏️';
+            editBtn.className = 'edit-btn';
+            editBtn.title = 'Edit Player';
+            editBtn.onclick = () => {
+                const newName = prompt('Edit name:', player.name);
+                if (newName) editPlayer(player.id, { name: newName });
+            };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerText = '🗑️';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.title = 'Delete Player';
+            deleteBtn.onclick = () => deletePlayer(player.id);
+            
+            actionCell.appendChild(presentBtn);
+            actionCell.appendChild(absentBtn);
+            actionCell.appendChild(editBtn);
+            actionCell.appendChild(deleteBtn);
+        } else {
+            actionCell.innerHTML = '👁️ View Only';
+            actionCell.style.color = '#64748b';
+            actionCell.style.fontSize = '0.85rem';
+        }
     });
 }
 
@@ -408,22 +587,26 @@ function renderFixtures() {
     const pastDiv = document.getElementById('pastFixtures');
     if (!upcomingDiv) return;
     
-    const now = new Date().toISOString().split('T')[0];
-    const upcoming = fixtures.filter(f => !f.isCompleted && f.date >= now);
-    const past = fixtures.filter(f => f.isCompleted || f.date < now);
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = fixtures.filter(f => !f.isCompleted && f.date >= today);
+    const past = fixtures.filter(f => f.isCompleted || f.date < today);
     
     upcomingDiv.innerHTML = upcoming.length ? '' : '<p>No upcoming fixtures</p>';
     upcoming.forEach(fixture => {
         upcomingDiv.innerHTML += `
-            <div class="fixture-card">
+            <div class="fixture-item">
                 <div>
                     <strong>${fixture.opponent}</strong><br>
                     📅 ${fixture.date} | ${fixture.venue} at ${fixture.location}
                 </div>
                 <div class="fixture-actions">
-                    <button class="edit-btn" onclick="editFixturePrompt(${fixture.id})">✏️ Edit</button>
-                    <button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>
-                    <button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>
+                    ${canEdit() ? `
+                        <button class="edit-btn" onclick="editFixturePrompt(${fixture.id})">✏️ Edit</button>
+                        <button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>
+                        <button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>
+                    ` : `
+                        <button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">👁️ View Stats</button>
+                    `}
                 </div>
             </div>
         `;
@@ -433,15 +616,16 @@ function renderFixtures() {
     past.forEach(fixture => {
         const resultText = fixture.result ? `${fixture.result.homeScore} - ${fixture.result.awayScore}` : 'No result yet';
         pastDiv.innerHTML += `
-            <div class="fixture-card completed">
+            <div class="fixture-item completed">
                 <div>
                     <strong>${fixture.opponent}</strong><br>
                     📅 ${fixture.date} | ${fixture.venue}<br>
                     🏆 Result: ${resultText}
                 </div>
                 <div class="fixture-actions">
-                    ${!fixture.matchStatsRecorded ? `<button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>` : '✅ Stats recorded'}
-                    <button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>
+                    ${canEdit() && !fixture.matchStatsRecorded ? `<button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>` : ''}
+                    ${!canEdit() && fixture.matchStatsRecorded ? '✅ Stats recorded' : ''}
+                    ${canEdit() ? `<button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>` : ''}
                 </div>
             </div>
         `;
@@ -474,10 +658,10 @@ function renderStats() {
         return `<tr>
             <td><strong>${player.name}</strong> ${player.photo ? '📸' : ''}</td>
             <td>${stats.apps}</td>
-            <td>⭐ ${stats.goals}</td>
-            <td>🎯 ${stats.assists}</td>
-            <td>${stats.avgRating}</td>
-            <td>${stats.cards}</td>
+            <td>⭐ ${stats.goals}</strong></td>
+            <td>🎯 ${stats.assists}</strong></td>
+            <td>${stats.avgRating}</strong></td>
+            <td>${stats.cards}</strong></td>
         </tr>`;
     });
     
@@ -493,16 +677,15 @@ function renderPayments() {
     const paymentsList = document.getElementById('paymentsList');
     if (!monthSpan) return;
     
-    monthSpan.innerText = getCurrentMonth();
+    const currentMonth = getCurrentMonth();
+    monthSpan.innerText = currentMonth;
     const paidCount = players.filter(p => hasPaidCurrentMonth(p)).length;
     const collected = paidCount * 70;
     const outstanding = (players.length - paidCount) * 70;
     
     summaryDiv.innerHTML = `<strong>💰 R${collected}</strong> collected | <strong>⚠️ R${outstanding}</strong> outstanding | 📊 ${paidCount}/${players.length} players paid`;
     
-    // FIXED: Properly closed table with no syntax errors
-    let tableHtml = '<table style="width:100%">';
-    tableHtml += '<thead><tr><th>Player</th><th>Photo</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+    let tableHtml = '<table style="width:100%"><thead><tr><th>Player</th><th>Photo</th><th>Status</th><th>Action</th></tr></thead><tbody>';
     
     players.forEach(player => {
         const paid = hasPaidCurrentMonth(player);
@@ -511,7 +694,7 @@ function renderPayments() {
                 <td>${player.name}</td>
                 <td>${player.photo ? '<img src="'+player.photo+'" class="player-photo" style="width:30px;height:30px;border-radius:50%;object-fit:cover">' : '📸'}</td>
                 <td>${paid ? '✅ Paid R70' : '❌ Unpaid'}</td>
-                <td>${!paid ? `<button class="pay-btn" onclick="markPayment(${player.id})">💰 Pay R70</button>` : '✔️ Done for this month'}</td>
+                <td>${!paid && canEdit() ? `<button class="pay-btn" onclick="markPayment(${player.id})">💰 Pay R70</button>` : (paid ? '✔️ Done' : '🔒 View Only')}</td>
             </tr>
         `;
     });
@@ -535,22 +718,33 @@ window.openStatsModal = function(fixtureId, opponent) {
     document.getElementById('modalMatchInfo').innerText = `vs ${opponent}`;
     const formDiv = document.getElementById('matchStatsForm');
     
-    formDiv.innerHTML = '<h4>Record per player:</h4>';
+    formDiv.innerHTML = '<h4>Player Statistics:</h4>';
     players.forEach(player => {
+        const existingStats = player.matchStats?.[fixtureId];
         formDiv.innerHTML += `
             <div class="player-stats-row">
                 <strong>${player.name} (${player.position})</strong><br>
-                Goals: <input type="number" id="goals_${player.id}" value="0" min="0" style="width:60px">
-                Assists: <input type="number" id="assists_${player.id}" value="0" min="0" style="width:60px">
-                Rating (1-10): <input type="number" id="rating_${player.id}" value="7" min="1" max="10" step="0.5" style="width:70px">
+                Goals: <input type="number" id="goals_${player.id}" value="${existingStats?.goals || 0}" min="0" style="width:60px">
+                Assists: <input type="number" id="assists_${player.id}" value="${existingStats?.assists || 0}" min="0" style="width:60px">
+                Rating (1-10): <input type="number" id="rating_${player.id}" value="${existingStats?.rating || 7}" min="1" max="10" step="0.5" style="width:70px">
                 Cards: <select id="cards_${player.id}">
-                    <option value="none">None</option>
-                    <option value="yellow">Yellow</option>
-                    <option value="red">Red</option>
+                    <option value="none" ${existingStats?.cards === 'none' ? 'selected' : ''}>None</option>
+                    <option value="yellow" ${existingStats?.cards === 'yellow' ? 'selected' : ''}>Yellow</option>
+                    <option value="red" ${existingStats?.cards === 'red' ? 'selected' : ''}>Red</option>
                 </select>
             </div>
         `;
     });
+    
+    if (!canEdit()) {
+        // Make form read-only for clients
+        document.querySelectorAll('#matchStatsForm input, #matchStatsForm select').forEach(el => {
+            el.disabled = true;
+        });
+        document.getElementById('saveMatchStatsBtn').style.display = 'none';
+    } else {
+        document.getElementById('saveMatchStatsBtn').style.display = 'block';
+    }
     
     document.getElementById('matchStatsModal').style.display = 'block';
 }
@@ -570,6 +764,8 @@ function handlePhotoUpload(file, callback) {
 
 // ========== EVENT LISTENERS ==========
 document.getElementById('addPlayerBtn')?.addEventListener('click', () => {
+    if (!canEdit()) return;
+    
     const name = document.getElementById('playerName').value;
     const jersey = document.getElementById('playerJersey').value;
     const position = document.getElementById('playerPosition').value;
@@ -582,20 +778,21 @@ document.getElementById('addPlayerBtn')?.addEventListener('click', () => {
     } else {
         addPlayer(name, jersey, position);
     }
-    
-    document.getElementById('playerName').value = '';
-    document.getElementById('playerJersey').value = '';
-    document.getElementById('playerPosition').value = '';
-    if (document.getElementById('playerPhoto')) document.getElementById('playerPhoto').value = '';
 });
 
-document.getElementById('markAllPresentBtn')?.addEventListener('click', markAllPresent);
+document.getElementById('markAllPresentBtn')?.addEventListener('click', () => {
+    if (canEdit()) markAllPresent();
+});
+
 document.getElementById('exportStatsCSVBtn')?.addEventListener('click', exportStatsToCSV);
+
 document.getElementById('sendReportBtn')?.addEventListener('click', () => {
     document.getElementById('reportModal').style.display = 'block';
 });
 
 document.getElementById('addFixtureBtn')?.addEventListener('click', () => {
+    if (!canEdit()) return;
+    
     addFixture(
         document.getElementById('fixtureOpponent').value,
         document.getElementById('fixtureDate').value,
@@ -608,6 +805,8 @@ document.getElementById('addFixtureBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('saveMatchStatsBtn')?.addEventListener('click', () => {
+    if (!canEdit()) return;
+    
     const statsData = {};
     players.forEach(player => {
         const goalsInput = document.getElementById(`goals_${player.id}`);
@@ -629,6 +828,7 @@ document.getElementById('saveMatchStatsBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('sendReportBtnModal')?.addEventListener('click', sendReport);
+document.getElementById('logoutBtn')?.addEventListener('click', logout);
 
 // Close modals
 document.querySelector('.close')?.addEventListener('click', () => {
@@ -653,7 +853,6 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`${tabId}Tab`).classList.add('active');
     
-    // Find the button that was clicked and add active class
     document.querySelectorAll('.tab-btn').forEach(btn => {
         if (btn.getAttribute('data-tab') === tabId) {
             btn.classList.add('active');
@@ -678,6 +877,9 @@ window.deleteFixture = deleteFixture;
 window.editFixturePrompt = editFixturePrompt;
 window.deletePlayer = deletePlayer;
 window.editPlayer = editPlayer;
+window.openStatsModal = openStatsModal;
 
-// ========== INITIALIZE ==========
-loadData();
+// ========== INITIALIZE LOGIN ==========
+initLogin();
+
+console.log('🚀 Midvaalens YD Ready!');
