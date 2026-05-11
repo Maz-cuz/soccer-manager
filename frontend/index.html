@@ -3,180 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midvaalens YD | Team Management System</title>
+    <title>Midvaalens YD | Team Management</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
             padding: 20px;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: white; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { color: rgba(255,255,255,0.9); margin-top: 5px; }
+        
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
         }
-        .header {
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
             text-align: center;
-            margin-bottom: 30px;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
         }
-        .header h1 {
-            color: #1e3c72;
-            font-size: 2.5rem;
+        .login-box h2 { color: #006B3F; margin-bottom: 10px; }
+        .login-box input, .login-box select, .login-box button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            font-size: 14px;
         }
-        .subtitle {
-            color: #666;
-            margin-top: 5px;
+        .login-box button {
+            background: #006B3F;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
         }
+        .login-box button:hover { background: #0055A0; transform: translateY(-2px); }
+        .error { color: #dc2626; margin-top: 10px; font-size: 14px; }
+        .success { color: #16a34a; margin-top: 10px; font-size: 14px; }
+        
+        /* Main App */
         .tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
+            background: white;
+            padding: 8px;
+            border-radius: 16px;
             flex-wrap: wrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .tab-btn {
             padding: 10px 20px;
-            background: #e9ecef;
+            background: transparent;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: 0.3s;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.3s;
         }
-        .tab-btn.active {
-            background: #2c7da0;
-            color: white;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
+        .tab-btn:hover { background: #f1f5f9; }
+        .tab-btn.active { background: #006B3F; color: white; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            color: #1e293b;
+            font-size: 1.35rem;
+            border-left: 4px solid #006B3F;
+            padding-left: 12px;
+            margin-bottom: 16px;
         }
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
             color: white;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 20px;
             text-align: center;
             font-weight: bold;
+            transition: transform 0.2s;
         }
-        .form-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card span { display: block; font-size: 2.5rem; margin-top: 8px; font-weight: 800; }
+        .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
         input, select, button {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             font-size: 14px;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0055A0;
+            box-shadow: 0 0 0 3px rgba(0,85,160,0.1);
         }
         button {
-            background: #2c7da0;
+            background: #006B3F;
             color: white;
             cursor: pointer;
             border: none;
-            transition: 0.3s;
+            font-weight: 600;
         }
-        button:hover {
-            background: #1f5e7a;
-        }
-        .delete-btn {
-            background: #dc3545;
-        }
-        .delete-btn:hover {
-            background: #c82333;
-        }
-        .edit-btn {
-            background: #ffc107;
-            color: #333;
-        }
-        .edit-btn:hover {
-            background: #e0a800;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #f8f9fa;
-        }
-        .player-photo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        button:hover:not(:disabled) { background: #0055A0; transform: translateY(-2px); }
+        .delete-btn { background: #dc2626; }
+        .delete-btn:hover { background: #b91c1c; }
+        .edit-btn { background: #f59e0b; }
+        .edit-btn:hover { background: #d97706; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        th { background: #f0fdf4; color: #006B3F; font-weight: 700; }
+        tr:hover { background: #f8fafc; }
+        .player-photo { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #006B3F; }
         .role-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 40px;
             font-size: 14px;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 12px;
         }
-        .role-admin {
-            background: #d4edda;
-            color: #155724;
-        }
-        .role-client {
-            background: #fff3cd;
-            color: #856404;
-        }
+        .role-admin { background: #006B3F; color: white; box-shadow: 0 2px 8px rgba(0,107,63,0.3); }
+        .role-client { background: #0055A0; color: white; }
         .readonly-msg {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 14px;
+            border-radius: 16px;
+            margin-bottom: 20px;
             text-align: center;
+            font-weight: bold;
+            border-left: 5px solid #f59e0b;
         }
         .fixture-item {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            background: #f8fafc;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+            transition: all 0.2s;
+            border-left: 5px solid #006B3F;
         }
-        .fixture-item.completed {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-        }
-        .fixture-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        .fixture-item:hover { transform: translateX(3px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .fixture-item.completed { background: #f0fdf4; border-left-color: #0055A0; }
         .modal {
             display: none;
             position: fixed;
@@ -185,110 +193,36 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
         }
         .modal-content {
             background: white;
             margin: 5% auto;
-            padding: 20px;
+            padding: 24px;
             width: 90%;
-            max-width: 600px;
-            border-radius: 12px;
-            max-height: 80%;
+            max-width: 700px;
+            border-radius: 28px;
+            max-height: 85%;
             overflow-y: auto;
+            border-top: 6px solid #006B3F;
         }
-        .close, .close-report {
-            float: right;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        /* Login Overlay */
-        #loginOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 350px;
-            width: 90%;
-        }
-        .login-box select, .login-box input, .login-box button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-        }
-        .login-box button {
-            background: #2c7da0;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .payments-summary {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .payment-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        .attendance-btn {
-            padding: 4px 8px;
-            margin: 0 2px;
-            font-size: 12px;
-        }
-        .attendance-btn.absent {
-            background: #dc3545;
-        }
-        .player-stats-row {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-        }
-        .fitness-fit { background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; }
-        .fitness-doubtful { background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; }
-        .fitness-unfit { background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        #adminActions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .pay-btn {
-            background: #28a745;
-        }
-        .pay-btn:hover {
-            background: #218838;
-        }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #64748b; }
+        .close:hover { color: #006B3F; }
+        #logoutBtn { background: #dc2626; margin-top: 12px; }
+        #logoutBtn:hover { background: #b91c1c; }
+        .attendance-btn { padding: 6px 12px; margin: 0 2px; font-size: 12px; }
+        .pay-btn { background: #16a34a; }
+        .pay-btn:hover { background: #15803d; }
+        .fitness-select { padding: 4px 8px; border-radius: 8px; }
+        .fitness-fit { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+        .fitness-doubtful { background: #fef9c3; color: #854d0e; padding: 4px 10px; border-radius: 20px; }
+        .fitness-unfit { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; }
         @media (max-width: 768px) {
-            th, td { font-size: 12px; padding: 6px; }
-            .tab-btn { padding: 6px 12px; font-size: 12px; }
-            button { padding: 6px 10px; font-size: 12px; }
+            body { padding: 12px; }
+            th, td { font-size: 12px; padding: 8px; }
+            .tab-btn { padding: 8px 14px; font-size: 13px; }
+            .card { padding: 16px; }
         }
     </style>
 </head>
@@ -297,74 +231,60 @@
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
     <div class="login-box">
-        <h2>⚽ Midvaalens YD</h2>
-        <p>Team Management System</p>
+        <h2>? Midvaalens YD</h2>
+        <p>Youth Development | Team Management</p>
         <select id="roleSelect">
-            <option value="admin">👑 Admin (Full Access)</option>
-            <option value="client">👀 Player/Viewer (Read Only)</option>
+            <option value="admin">?? Admin (Full Access)</option>
+            <option value="client">?? Player/Viewer (Read Only)</option>
         </select>
         <input type="password" id="adminPassword" placeholder="Admin password" />
         <button id="loginBtn">Login</button>
-        <p style="font-size:12px; margin-top:10px;">Admin password: <strong>admin123</strong><br>Viewer: no password needed</p>
+        <div id="loginError" class="error"></div>
     </div>
 </div>
 
-<!-- MAIN APP (hidden until login) -->
+<!-- MAIN APP -->
 <div id="mainApp" style="display:none;">
     <div class="container">
         <div class="header">
-            <h1>⚽ Midvaalens YD</h1>
+            <h1>? Midvaalens YD</h1>
             <p class="subtitle">Youth Development | Team Management System</p>
             <div id="roleBadge" class="role-badge"></div>
-            <button id="logoutBtn" style="margin-top:10px; background:#dc3545; color:white; border:none; padding:5px 15px; border-radius:5px; cursor:pointer;">Logout</button>
+            <button id="logoutBtn">Logout</button>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="players">👥 Players</button>
-            <button class="tab-btn" data-tab="fixtures">📅 Fixtures</button>
-            <button class="tab-btn" data-tab="stats">📊 Statistics</button>
-            <button class="tab-btn" data-tab="payments">💰 Payments</button>
+            <button class="tab-btn active" data-tab="players">?? Players</button>
+            <button class="tab-btn" data-tab="fixtures">?? Fixtures</button>
+            <button class="tab-btn" data-tab="stats">?? Statistics</button>
+            <button class="tab-btn" data-tab="payments">?? Payments</button>
         </div>
 
-        <!-- Read Only Warning -->
         <div id="readonlyWarning" class="readonly-msg" style="display:none;">
-            ⚠️ You are in <strong>View Only Mode</strong>. You cannot add, edit, or delete data.
+            ?? You are in <strong>View Only Mode</strong>. You cannot add, edit, or delete data.
         </div>
 
         <!-- Players Tab -->
         <div id="playersTab" class="tab-content active">
             <div class="card" id="addPlayerCard">
-                <h2>➕ Add New Player</h2>
+                <h2>? Add New Player</h2>
                 <div class="form-row">
                     <input type="text" id="playerName" placeholder="Full name" />
                     <input type="text" id="playerJersey" placeholder="Jersey #" />
                     <input type="text" id="playerPosition" placeholder="Position" />
-                    <input type="file" id="playerPhoto" accept="image/*" />
                     <button id="addPlayerBtn">Add Player</button>
                 </div>
             </div>
-
             <div class="dashboard">
-                <div class="stat-card">👥 Total Players: <span id="totalPlayers">0</span></div>
-                <div class="stat-card">✅ Today's Attendance: <span id="todayAttendance">0</span></div>
-                <div class="stat-card">💪 Fit Players: <span id="fitCount">0</span></div>
+                <div class="stat-card">?? Total Players: <span id="totalPlayers">0</span></div>
+                <div class="stat-card">? Today's Attendance: <span id="todayAttendance">0</span></div>
+                <div class="stat-card">?? Fit Players: <span id="fitCount">0</span></div>
             </div>
-
             <div class="card">
-                <div class="card-header">
-                    <h2>📋 Player Management</h2>
-                    <div id="adminActions">
-                        <button id="markAllPresentBtn">✅ Mark All Present</button>
-                        <button id="exportStatsCSVBtn">📥 Export Stats CSV</button>
-                        <button id="sendReportBtn">📧 Send Report</button>
-                    </div>
-                </div>
+                <h2>?? Player Management</h2>
                 <div style="overflow-x: auto;">
                     <table id="playerTable">
-                        <thead>
-                            <tr><th>Photo</th><th>Name</th><th>Jersey</th><th>Position</th><th>Fitness</th><th>Today</th><th>Last 5</th><th>Actions</th></tr>
-                        </thead>
+                        <thead><tr><th>Photo</th><th>Name</th><th>Jersey</th><th>Position</th><th>Fitness</th><th>Today</th><th>Last 5</th><th>Actions</th></tr></thead>
                         <tbody id="playerTableBody"></tbody>
                     </table>
                 </div>
@@ -374,7 +294,7 @@
         <!-- Fixtures Tab -->
         <div id="fixturesTab" class="tab-content">
             <div class="card" id="addFixtureCard">
-                <h2>➕ Add New Fixture</h2>
+                <h2>? Add New Fixture</h2>
                 <div class="form-row">
                     <input type="text" id="fixtureOpponent" placeholder="Opponent team" />
                     <input type="date" id="fixtureDate" />
@@ -386,25 +306,19 @@
                     <button id="addFixtureBtn">Add Fixture</button>
                 </div>
             </div>
-            <div class="card">
-                <h2>📅 Upcoming Matches</h2>
-                <div id="upcomingFixtures" class="fixtures-list"></div>
-            </div>
-            <div class="card">
-                <h2>📜 Past Fixtures & Results</h2>
-                <div id="pastFixtures" class="fixtures-list"></div>
-            </div>
+            <div class="card"><h2>?? Upcoming Matches</h2><div id="upcomingFixtures"></div></div>
+            <div class="card"><h2>?? Past Fixtures & Results</h2><div id="pastFixtures"></div></div>
         </div>
 
         <!-- Stats Tab -->
         <div id="statsTab" class="tab-content">
             <div class="dashboard">
-                <div class="stat-card">⭐ Top Goalscorer: <span id="topScorer">-</span></div>
-                <div class="stat-card">🏆 Top Rating: <span id="topRated">-</span></div>
-                <div class="stat-card">📊 Total Goals: <span id="totalGoals">0</span></div>
+                <div class="stat-card">? Top Goalscorer: <span id="topScorer">-</span></div>
+                <div class="stat-card">?? Top Rating: <span id="topRated">-</span></div>
+                <div class="stat-card">?? Total Goals: <span id="totalGoals">0</span></div>
             </div>
             <div class="card">
-                <h2>📈 Player Statistics (Season)</h2>
+                <h2>?? Player Statistics (Season)</h2>
                 <div style="overflow-x: auto;">
                     <table id="statsTable">
                         <thead><tr><th>Player</th><th>Apps</th><th>Goals</th><th>Assists</th><th>Avg Rating</th><th>Cards</th></tr></thead>
@@ -417,535 +331,240 @@
         <!-- Payments Tab -->
         <div id="paymentsTab" class="tab-content">
             <div class="card">
-                <h2>💰 Monthly Payments (R70)</h2>
+                <h2>?? Monthly Payments (R70)</h2>
                 <p>Current month: <strong id="paymentMonth"></strong></p>
-                <div id="paymentsSummary" class="payments-summary"></div>
+                <div id="paymentsSummary" class="payments-summary" style="background: linear-gradient(135deg, #e6f7ec, #e0f2fe); padding: 18px; border-radius: 20px; margin-bottom: 20px; font-weight: bold;"></div>
                 <div id="paymentsList"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
-<div id="matchStatsModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>📝 Record Match Stats</h2>
-        <h3 id="modalMatchInfo"></h3>
-        <div id="matchStatsForm"></div>
-        <button id="saveMatchStatsBtn">Save Statistics</button>
-    </div>
-</div>
-
-<div id="reportModal" class="modal">
-    <div class="modal-content">
-        <span class="close-report">&times;</span>
-        <h2>📧 Send Match Report</h2>
-        <div class="form-row">
-            <select id="reportFixtureSelect">
-                <option value="">Select fixture...</option>
-            </select>
-            <select id="reportMethod">
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">Email</option>
-            </select>
-            <input type="text" id="reportRecipient" placeholder="Phone number or email" />
-            <button id="sendReportBtnModal">Send Report</button>
-        </div>
-        <div id="reportPreview" class="report-preview"></div>
-    </div>
-</div>
-
 <script>
-    // ========== ROLE BASED ACCESS CONTROL WITH LOGIN ==========
-    let currentRole = null; // 'admin' or 'client'
+    // ===== IMPORTANT: UPDATE THIS URL WITH YOUR RENDER BACKEND URL =====
+    // Example: https://midvaalens-backend.onrender.com/api
+    const API_URL = "https://soccer-manager-61iv.onrender.com/api";
+    
+    let currentRole = null;
+    let players = [];
+    let fixtures = [];
+    let currentDate = new Date().toISOString().split('T')[0];
 
     // Login handler
-    function initLogin() {
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', function() {
-                const selectedRole = document.getElementById('roleSelect').value;
-                const enteredPassword = document.getElementById('adminPassword').value;
-                const ADMIN_PASSWORD = "admin123";
-                
-                if (selectedRole === 'admin') {
-                    if (enteredPassword === ADMIN_PASSWORD) {
-                        currentRole = 'admin';
-                        hideLoginAndStartApp();
-                    } else {
-                        alert('Wrong admin password!');
-                    }
-                } else {
-                    currentRole = 'client';
-                    hideLoginAndStartApp();
-                }
+    document.getElementById('loginBtn').onclick = async () => {
+        const role = document.getElementById('roleSelect').value;
+        const password = document.getElementById('adminPassword').value;
+        const errorDiv = document.getElementById('loginError');
+        
+        try {
+            const response = await fetch(`${API_URL}/auth`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role, password })
             });
+            const data = await response.json();
+            
+            if (data.success) {
+                currentRole = data.role;
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                updateUI();
+                loadData();
+            } else {
+                errorDiv.innerText = 'Wrong password! Try: admin123';
+            }
+        } catch(err) {
+            errorDiv.innerText = 'Cannot connect to backend. Make sure server is running!';
+            console.error('Login error:', err);
         }
-    }
+    };
 
-    function hideLoginAndStartApp() {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        updateRoleBadge();
-        loadData();
-    }
-
-    function logout() {
+    document.getElementById('logoutBtn').onclick = () => {
         currentRole = null;
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('loginOverlay').style.display = 'flex';
         document.getElementById('adminPassword').value = '';
-        document.getElementById('roleSelect').value = 'admin';
-    }
+        document.getElementById('loginError').innerText = '';
+    };
 
-    function canEdit() {
-        return currentRole === 'admin';
-    }
+    function canEdit() { return currentRole === 'admin'; }
 
-    function updateRoleBadge() {
+    function updateUI() {
         const badge = document.getElementById('roleBadge');
-        if (badge) {
-            if (canEdit()) {
-                badge.innerHTML = '👑 Admin Mode - Full Access';
-                badge.className = 'role-badge role-admin';
-            } else {
-                badge.innerHTML = '👁️ Client Mode - View Only';
-                badge.className = 'role-badge role-client';
-            }
-        }
-        
-        const warning = document.getElementById('readonlyWarning');
-        if (warning) {
-            warning.style.display = canEdit() ? 'none' : 'block';
-        }
-        
-        // Hide/show add forms
-        const addPlayerCard = document.getElementById('addPlayerCard');
-        const addFixtureCard = document.getElementById('addFixtureCard');
-        const adminActions = document.getElementById('adminActions');
-        
-        if (addPlayerCard) addPlayerCard.style.display = canEdit() ? 'block' : 'none';
-        if (addFixtureCard) addFixtureCard.style.display = canEdit() ? 'block' : 'none';
-        if (adminActions) adminActions.style.display = canEdit() ? 'flex' : 'none';
+        badge.innerHTML = canEdit() ? '?? Admin Mode - Full Access' : '??? Client Mode - View Only';
+        badge.className = canEdit() ? 'role-badge role-admin' : 'role-badge role-client';
+        document.getElementById('readonlyWarning').style.display = canEdit() ? 'none' : 'block';
+        document.getElementById('addPlayerCard').style.display = canEdit() ? 'block' : 'none';
+        document.getElementById('addFixtureCard').style.display = canEdit() ? 'block' : 'none';
     }
 
-    // ========== DATA STRUCTURE ==========
-    let players = [];
-    let fixtures = [];
-    let currentSessionDate = new Date().toISOString().split('T')[0];
-
-    function loadData() {
+    async function loadData() {
         try {
-            const storedPlayers = localStorage.getItem('midvaalensPlayers');
-            const storedFixtures = localStorage.getItem('midvaalensFixtures');
-            
-            players = storedPlayers ? JSON.parse(storedPlayers) : [];
-            fixtures = storedFixtures ? JSON.parse(storedFixtures) : [];
-            
-            // Add sample data if empty
-            if (players.length === 0) {
-                players = [
-                    { id: 1, name: "Thabo Nkosi", jersey: "10", position: "Forward", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() },
-                    { id: 2, name: "Sipho Dlamini", jersey: "5", position: "Defender", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() },
-                    { id: 3, name: "Lerato Molefe", jersey: "7", position: "Midfielder", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() },
-                    { id: 4, name: "Michael Johnson", jersey: "9", position: "Forward", fitness: "fit", attendance: {}, payments: {}, matchStats: {}, photo: null, createdAt: new Date().toISOString() }
-                ];
-                saveData();
-            }
-            
-            if (fixtures.length === 0) {
-                const today = new Date().toISOString().split('T')[0];
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                const lastWeek = new Date();
-                lastWeek.setDate(lastWeek.getDate() - 7);
-                
-                fixtures = [
-                    { id: 1, opponent: "Sundowns FC", date: lastWeek.toISOString().split('T')[0], venue: "Home", location: "Midvaal Stadium", isCompleted: true, result: { homeScore: 2, awayScore: 1 }, matchStatsRecorded: true },
-                    { id: 2, opponent: "Chiefs United", date: today, venue: "Away", location: "FNB Stadium", isCompleted: false, result: null, matchStatsRecorded: false },
-                    { id: 3, opponent: "Pirates Academy", date: nextWeek.toISOString().split('T')[0], venue: "Home", location: "Midvaal Stadium", isCompleted: false, result: null, matchStatsRecorded: false }
-                ];
-                saveData();
-            }
-            
-            console.log('✅ Loaded players:', players.length);
-            console.log('✅ Loaded fixtures:', fixtures.length);
-            
-            render();
-        } catch (error) {
-            console.error('❌ Error loading data:', error);
-            players = [];
-            fixtures = [];
-        }
+            const [playersRes, fixturesRes] = await Promise.all([
+                fetch(`${API_URL}/players`),
+                fetch(`${API_URL}/fixtures`)
+            ]);
+            players = await playersRes.json();
+            fixtures = await fixturesRes.json();
+            renderAll();
+        } catch(e) { console.error('Error loading data:', e); }
     }
 
-    function saveData() {
-        try {
-            localStorage.setItem('midvaalensPlayers', JSON.stringify(players));
-            localStorage.setItem('midvaalensFixtures', JSON.stringify(fixtures));
-            return true;
-        } catch (error) {
-            console.error('❌ Error saving data:', error);
-            return false;
-        }
-    }
-
-    // ========== PLAYER FUNCTIONS ==========
-    function addPlayer(name, jersey, position, photoBase64 = null) {
-        if (!canEdit()) { alert('View-only mode. Cannot add players.'); return false; }
-        if (!name || !name.trim()) { alert('Player name required!'); return false; }
+    async function addPlayer() {
+        if (!canEdit()) return;
+        const name = document.getElementById('playerName').value;
+        const jersey = document.getElementById('playerJersey').value;
+        const position = document.getElementById('playerPosition').value;
+        if (!name) return alert('Player name required');
         
-        const newPlayer = {
-            id: Date.now(),
-            name: name.trim(),
-            jersey: jersey.trim() || 'N/A',
-            position: position.trim() || 'N/A',
-            fitness: 'fit',
-            attendance: {},
-            payments: {},
-            matchStats: {},
-            photo: photoBase64,
-            createdAt: new Date().toISOString()
-        };
-        
-        players.push(newPlayer);
-        saveData();
-        render();
-        
+        await fetch(`${API_URL}/players`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, jersey, position, fitness: 'fit', attendance: {}, payments: {}, matchStats: {} })
+        });
+        await loadData();
         document.getElementById('playerName').value = '';
         document.getElementById('playerJersey').value = '';
         document.getElementById('playerPosition').value = '';
-        if (document.getElementById('playerPhoto')) document.getElementById('playerPhoto').value = '';
+    }
+
+    async function addFixture() {
+        if (!canEdit()) return;
+        const opponent = document.getElementById('fixtureOpponent').value;
+        const date = document.getElementById('fixtureDate').value;
+        const venue = document.getElementById('fixtureVenue').value;
+        const location = document.getElementById('fixtureLocation').value;
+        if (!opponent || !date) return alert('Opponent and date required');
         
-        return true;
-    }
-
-    function deletePlayer(playerId) {
-        if (!canEdit()) { alert('View-only mode. Cannot delete players.'); return; }
-        if (confirm('Delete this player?')) {
-            players = players.filter(p => p.id !== playerId);
-            saveData();
-            render();
-        }
-    }
-
-    function editPlayer(playerId, updatedData) {
-        if (!canEdit()) return;
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-            Object.assign(player, updatedData);
-            saveData();
-            render();
-        }
-    }
-
-    function updateFitness(playerId, fitness) {
-        if (!canEdit()) return;
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-            player.fitness = fitness;
-            saveData();
-            render();
-        }
-    }
-
-    function markAttendance(playerId, status) {
-        if (!canEdit()) { alert('View-only mode. Cannot mark attendance.'); return; }
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-            if (!player.attendance) player.attendance = {};
-            player.attendance[currentSessionDate] = status;
-            saveData();
-            render();
-        }
-    }
-
-    function markAllPresent() {
-        if (!canEdit()) { alert('View-only mode.'); return; }
-        players.forEach(player => {
-            if (!player.attendance) player.attendance = {};
-            player.attendance[currentSessionDate] = 'present';
+        await fetch(`${API_URL}/fixtures`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ opponent, date, venue, location, isCompleted: false, result: null, matchStatsRecorded: false })
         });
-        saveData();
-        render();
+        await loadData();
+        document.getElementById('fixtureOpponent').value = '';
+        document.getElementById('fixtureDate').value = '';
+        document.getElementById('fixtureLocation').value = '';
     }
+
+    async function deletePlayer(id) {
+        if (!confirm('Delete this player?')) return;
+        await fetch(`${API_URL}/players/${id}`, { method: 'DELETE' });
+        await loadData();
+    }
+
+    async function deleteFixture(id) {
+        if (!confirm('Delete this fixture?')) return;
+        await fetch(`${API_URL}/fixtures/${id}`, { method: 'DELETE' });
+        await loadData();
+    }
+
+    async function updatePlayer(id, data) {
+        await fetch(`${API_URL}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        await loadData();
+    }
+
+    async function markAttendance(id, status) {
+        const player = players.find(p => p._id === id);
+        if (player) {
+            player.attendance = player.attendance || {};
+            player.attendance[currentDate] = status;
+            await updatePlayer(id, { attendance: player.attendance });
+        }
+    }
+
+    document.getElementById('addPlayerBtn').onclick = addPlayer;
+    document.getElementById('addFixtureBtn').onclick = addFixture;
+    
+    window.deletePlayer = deletePlayer;
+    window.deleteFixture = deleteFixture;
+    window.markAttendance = markAttendance;
+    window.updatePlayer = updatePlayer;
 
     function getLast5Attendance(player) {
         if (!player.attendance) return [];
-        const dates = Object.keys(player.attendance).sort().reverse().slice(0, 5);
-        return dates.map(date => player.attendance[date]);
-    }
-
-    // ========== FIXTURE FUNCTIONS ==========
-    function addFixture(opponent, date, venue, location) {
-        if (!canEdit()) { alert('View-only mode. Cannot add fixtures.'); return; }
-        if (!opponent || !date) return alert('Opponent and date required');
-        
-        const newFixture = {
-            id: Date.now(),
-            opponent: opponent,
-            date: date,
-            venue: venue,
-            location: location || 'TBD',
-            isCompleted: false,
-            result: null,
-            matchStatsRecorded: false
-        };
-        fixtures.push(newFixture);
-        fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-        saveData();
-        renderFixtures();
-    }
-
-    function deleteFixture(fixtureId) {
-        if (!canEdit()) { alert('View-only mode. Cannot delete fixtures.'); return; }
-        if (confirm('Delete this fixture?')) {
-            players.forEach(player => {
-                if (player.matchStats && player.matchStats[fixtureId]) {
-                    delete player.matchStats[fixtureId];
-                }
-            });
-            fixtures = fixtures.filter(f => f.id !== fixtureId);
-            saveData();
-            renderFixtures();
-            renderStats();
-        }
-    }
-
-    function editFixturePrompt(fixtureId) {
-        if (!canEdit()) return;
-        const fixture = fixtures.find(f => f.id === fixtureId);
-        if (!fixture) return;
-        
-        const newOpponent = prompt('Opponent:', fixture.opponent);
-        const newDate = prompt('Date (YYYY-MM-DD):', fixture.date);
-        const newVenue = prompt('Venue (Home/Away):', fixture.venue);
-        const newLocation = prompt('Location:', fixture.location);
-        
-        if (newOpponent && newDate) {
-            const fixtureToUpdate = fixtures.find(f => f.id === fixtureId);
-            if (fixtureToUpdate) {
-                fixtureToUpdate.opponent = newOpponent;
-                fixtureToUpdate.date = newDate;
-                fixtureToUpdate.venue = newVenue;
-                fixtureToUpdate.location = newLocation;
-                saveData();
-                renderFixtures();
-            }
-        }
-    }
-
-    // ========== MATCH STATISTICS ==========
-    function recordMatchStats(fixtureId, statsData) {
-        if (!canEdit()) { alert('View-only mode. Cannot record stats.'); return; }
-        const fixture = fixtures.find(f => f.id === fixtureId);
-        if (!fixture) return;
-        
-        Object.keys(statsData).forEach(playerId => {
-            const player = players.find(p => p.id === parseInt(playerId));
-            if (player) {
-                if (!player.matchStats) player.matchStats = {};
-                player.matchStats[fixtureId] = statsData[playerId];
-            }
-        });
-        
-        fixture.matchStatsRecorded = true;
-        saveData();
-        render();
+        return Object.keys(player.attendance).sort().reverse().slice(0,5).map(d => player.attendance[d]);
     }
 
     function getPlayerSeasonStats(player) {
-        let apps = 0, goals = 0, assists = 0, totalRating = 0, ratingCount = 0, cards = { yellow: 0, red: 0 };
-        
+        let apps = 0, goals = 0, assists = 0, totalRating = 0, ratingCount = 0, yellows = 0, reds = 0;
         if (player.matchStats) {
             Object.values(player.matchStats).forEach(stat => {
                 apps++;
                 goals += stat.goals || 0;
                 assists += stat.assists || 0;
-                if (stat.rating) {
-                    totalRating += stat.rating;
-                    ratingCount++;
-                }
-                if (stat.cards === 'yellow') cards.yellow++;
-                if (stat.cards === 'red') cards.red++;
+                if (stat.rating) { totalRating += stat.rating; ratingCount++; }
+                if (stat.cards === 'yellow') yellows++;
+                if (stat.cards === 'red') reds++;
             });
         }
-        
         const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '-';
-        const cardString = cards.yellow > 0 || cards.red > 0 ? `🟨${cards.yellow} 🟥${cards.red}` : '-';
-        
+        const cardString = (yellows || reds) ? `??${yellows} ??${reds}` : '-';
         return { apps, goals, assists, avgRating, cards: cardString };
     }
 
-    // ========== PAYMENTS ==========
-    function getCurrentMonth() {
-        const now = new Date();
-        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    }
-
-    function hasPaidCurrentMonth(player) {
-        return player.payments && player.payments[getCurrentMonth()] === true;
-    }
-
-    function markPayment(playerId) {
-        if (!canEdit()) { alert('View-only mode. Cannot record payments.'); return; }
-        const player = players.find(p => p.id === playerId);
-        if (player) {
-            if (!player.payments) player.payments = {};
-            player.payments[getCurrentMonth()] = true;
-            saveData();
-            renderPayments();
-        }
-    }
-
-    // ========== EXPORT & REPORT ==========
-    function exportStatsToCSV() {
-        const csvRows = [['Player Name', 'Jersey', 'Position', 'Appearances', 'Goals', 'Assists', 'Average Rating', 'Cards']];
-        
-        players.forEach(player => {
-            const stats = getPlayerSeasonStats(player);
-            csvRows.push([player.name, player.jersey, player.position, stats.apps, stats.goals, stats.assists, stats.avgRating, stats.cards]);
-        });
-        
-        const csvContent = csvRows.map(row => row.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `midvaalens_stats_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function generateMatchReport(fixtureId) {
-        const fixture = fixtures.find(f => f.id === fixtureId);
-        if (!fixture) return 'No fixture selected';
-        
-        let report = `🏆 MIDVAALENS YD - MATCH REPORT 🏆\n\n`;
-        report += `Opponent: ${fixture.opponent}\n`;
-        report += `Date: ${fixture.date}\n`;
-        report += `Venue: ${fixture.venue} (${fixture.location})\n\n`;
-        
-        report += `📊 PLAYER STATISTICS:\n`;
-        report += `----------------------------------------\n`;
-        
-        let hasStats = false;
-        players.forEach(player => {
-            const stats = player.matchStats?.[fixtureId];
-            if (stats && (stats.goals > 0 || stats.assists > 0)) {
-                hasStats = true;
-                report += `\n${player.name} (#${player.jersey})\n`;
-                if (stats.goals > 0) report += `  ⚽ Goals: ${stats.goals}\n`;
-                if (stats.assists > 0) report += `  🎯 Assists: ${stats.assists}\n`;
-                if (stats.rating) report += `  ⭐ Rating: ${stats.rating}/10\n`;
-            }
-        });
-        
-        if (!hasStats) report += `No statistics recorded for this match yet.\n`;
-        
-        report += `\n---\nMidvaalens YD | Growing Champions! ⚽`;
-        return report;
-    }
-
-    function sendReport() {
-        const fixtureId = parseInt(document.getElementById('reportFixtureSelect').value);
-        const method = document.getElementById('reportMethod').value;
-        const recipient = document.getElementById('reportRecipient').value;
-        
-        if (!fixtureId || !recipient) {
-            alert('Please select a fixture and enter recipient info');
-            return;
-        }
-        
-        const report = generateMatchReport(fixtureId);
-        const encodedReport = encodeURIComponent(report);
-        
-        if (method === 'whatsapp') {
-            let phone = recipient.replace(/[^0-9]/g, '');
-            if (!phone.startsWith('27') && phone.length === 10) phone = '27' + phone;
-            window.open(`https://wa.me/${phone}?text=${encodedReport}`, '_blank');
-        } else if (method === 'email') {
-            const subject = encodeURIComponent(`Match Report`);
-            window.open(`mailto:${recipient}?subject=${subject}&body=${encodedReport}`, '_blank');
-        }
-        
-        alert('Report sent!');
-    }
-
-    // ========== RENDER FUNCTIONS ==========
     function renderPlayers() {
         const tbody = document.getElementById('playerTableBody');
         if (!tbody) return;
         
-        const todayPresent = players.filter(p => p.attendance?.[currentSessionDate] === 'present').length;
-        const fitCount = players.filter(p => p.fitness === 'fit').length;
-        
         document.getElementById('totalPlayers').innerText = players.length;
-        document.getElementById('todayAttendance').innerText = todayPresent;
-        document.getElementById('fitCount').innerText = fitCount;
+        document.getElementById('todayAttendance').innerText = players.filter(p => p.attendance?.[currentDate] === 'present').length;
+        document.getElementById('fitCount').innerText = players.filter(p => p.fitness === 'fit').length;
         
         tbody.innerHTML = '';
-        players.forEach(player => {
-            const todayStatus = player.attendance?.[currentSessionDate] || 'not marked';
-            const last5 = getLast5Attendance(player);
-            const historyDisplay = last5.map(s => s === 'present' ? '✅' : s === 'absent' ? '❌' : '⬜').join('');
-            
+        players.forEach(p => {
             const row = tbody.insertRow();
-            
-            const photoCell = row.insertCell(0);
-            if (player.photo) {
-                const img = document.createElement('img');
-                img.src = player.photo;
-                img.className = 'player-photo';
-                photoCell.appendChild(img);
-            } else {
-                photoCell.innerHTML = '📸';
-            }
-            
-            row.insertCell(1).innerText = player.name;
-            row.insertCell(2).innerText = player.jersey;
-            row.insertCell(3).innerText = player.position;
+            row.insertCell(0).innerHTML = p.photo ? `<img src="${p.photo}" class="player-photo">` : '??';
+            row.insertCell(1).innerText = p.name;
+            row.insertCell(2).innerText = p.jersey;
+            row.insertCell(3).innerText = p.position;
             
             const fitnessCell = row.insertCell(4);
             if (canEdit()) {
                 const select = document.createElement('select');
-                select.className = `fitness-select`;
+                select.className = 'fitness-select';
                 ['fit', 'doubtful', 'unfit'].forEach(opt => {
                     const option = document.createElement('option');
                     option.value = opt;
-                    option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
-                    if (player.fitness === opt) option.selected = true;
+                    option.textContent = opt;
+                    if (p.fitness === opt) option.selected = true;
                     select.appendChild(option);
                 });
-                select.onchange = (e) => updateFitness(player.id, e.target.value);
+                select.onchange = (e) => updatePlayer(p._id, { fitness: e.target.value });
                 fitnessCell.appendChild(select);
             } else {
-                fitnessCell.innerHTML = `<span class="fitness-${player.fitness}">${player.fitness}</span>`;
+                fitnessCell.innerHTML = `<span class="fitness-${p.fitness}">${p.fitness}</span>`;
             }
             
-            row.insertCell(5).innerHTML = todayStatus === 'present' ? '✅ Present' : todayStatus === 'absent' ? '❌ Absent' : '⚪';
-            row.insertCell(6).innerHTML = historyDisplay || '⬜⬜⬜⬜⬜';
+            const todayStatus = p.attendance?.[currentDate] || 'not marked';
+            row.insertCell(5).innerHTML = todayStatus === 'present' ? '? Present' : todayStatus === 'absent' ? '? Absent' : '? Not marked';
+            
+            const last5 = getLast5Attendance(p);
+            row.insertCell(6).innerHTML = last5.map(s => s === 'present' ? '?' : s === 'absent' ? '?' : '?').join('') || '?????';
             
             const actionCell = row.insertCell(7);
             if (canEdit()) {
                 actionCell.innerHTML = `
-                    <button class="attendance-btn" onclick="markAttendance(${player.id}, 'present')">✅</button>
-                    <button class="attendance-btn absent" onclick="markAttendance(${player.id}, 'absent')">❌</button>
-                    <button class="edit-btn" onclick="editPlayerPrompt(${player.id}, '${player.name}')">✏️</button>
-                    <button class="delete-btn" onclick="deletePlayer(${player.id})">🗑️</button>
+                    <button class="attendance-btn" onclick="markAttendance('${p._id}', 'present')">?</button>
+                    <button class="attendance-btn absent" onclick="markAttendance('${p._id}', 'absent')" style="background:#dc2626;">?</button>
+                    <button class="edit-btn" onclick="editPlayerName('${p._id}', '${p.name}')">??</button>
+                    <button class="delete-btn" onclick="deletePlayer('${p._id}')">???</button>
                 `;
             } else {
-                actionCell.innerHTML = '👁️ Read Only';
+                actionCell.innerHTML = '??? Read Only';
                 actionCell.style.color = '#64748b';
             }
         });
     }
-    
-    function editPlayerPrompt(playerId, currentName) {
-        const newName = prompt('Edit player name:', currentName);
-        if (newName) editPlayer(playerId, { name: newName });
-    }
+
+    window.editPlayerName = async (id, oldName) => {
+        const newName = prompt('Edit player name:', oldName);
+        if (newName) await updatePlayer(id, { name: newName });
+    };
 
     function renderFixtures() {
         const upcomingDiv = document.getElementById('upcomingFixtures');
@@ -957,52 +576,36 @@
         const past = fixtures.filter(f => f.isCompleted || f.date < today);
         
         upcomingDiv.innerHTML = upcoming.length ? '' : '<p>No upcoming fixtures</p>';
-        upcoming.forEach(fixture => {
+        upcoming.forEach(f => {
             upcomingDiv.innerHTML += `
                 <div class="fixture-item">
                     <div>
-                        <strong>${fixture.opponent}</strong><br>
-                        📅 ${fixture.date} | ${fixture.venue} at ${fixture.location}
+                        <strong>${f.opponent}</strong><br>
+                        ?? ${f.date} | ${f.venue} at ${f.location}
                     </div>
                     <div class="fixture-actions">
-                        ${canEdit() ? `
-                            <button class="edit-btn" onclick="editFixturePrompt(${fixture.id})">✏️ Edit</button>
-                            <button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>
-                            <button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>
-                        ` : `
-                            <button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">👁️ View Stats</button>
-                        `}
+                        ${canEdit() ? `<button class="delete-btn" onclick="deleteFixture('${f._id}')">??? Delete</button>` : ''}
                     </div>
                 </div>
             `;
         });
         
         pastDiv.innerHTML = past.length ? '' : '<p>No past fixtures</p>';
-        past.forEach(fixture => {
-            const resultText = fixture.result ? `${fixture.result.homeScore} - ${fixture.result.awayScore}` : 'No result';
+        past.forEach(f => {
+            const resultText = f.result ? `${f.result.homeScore} - ${f.result.awayScore}` : 'No result';
             pastDiv.innerHTML += `
                 <div class="fixture-item completed">
                     <div>
-                        <strong>${fixture.opponent}</strong><br>
-                        📅 ${fixture.date} | ${fixture.venue}<br>
-                        🏆 Result: ${resultText}
+                        <strong>${f.opponent}</strong><br>
+                        ?? ${f.date}<br>
+                        ?? Result: ${resultText}
                     </div>
                     <div class="fixture-actions">
-                        ${canEdit() && !fixture.matchStatsRecorded ? `<button onclick="openStatsModal(${fixture.id}, '${fixture.opponent}')">📊 Record Stats</button>` : ''}
-                        ${canEdit() ? `<button class="delete-btn" onclick="deleteFixture(${fixture.id})">🗑️ Delete</button>` : ''}
-                        ${!canEdit() && fixture.matchStatsRecorded ? '✅ Stats recorded' : ''}
+                        ${canEdit() ? `<button class="delete-btn" onclick="deleteFixture('${f._id}')">??? Delete</button>` : ''}
                     </div>
                 </div>
             `;
         });
-        
-        const select = document.getElementById('reportFixtureSelect');
-        if (select) {
-            select.innerHTML = '<option value="">Select fixture...</option>';
-            [...upcoming, ...past].forEach(fixture => {
-                select.innerHTML += `<option value="${fixture.id}">${fixture.opponent} (${fixture.date})</option>`;
-            });
-        }
     }
 
     function renderStats() {
@@ -1014,20 +617,22 @@
         let totalGoals = 0;
         
         tbody.innerHTML = '';
-        players.forEach(player => {
-            const stats = getPlayerSeasonStats(player);
+        players.forEach(p => {
+            const stats = getPlayerSeasonStats(p);
             totalGoals += stats.goals;
-            if (stats.goals > topScorer.goals) topScorer = { name: player.name, goals: stats.goals };
-            if (stats.avgRating !== '-' && parseFloat(stats.avgRating) > topRated.rating) topRated = { name: player.name, rating: parseFloat(stats.avgRating) };
-            
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td><strong>${player.name}</strong> ${player.photo ? '📸' : ''}</td>
-                <td>${stats.apps}</td>
-                <td>⭐ ${stats.goals}</td>
-                <td>🎯 ${stats.assists}</td>
-                <td>${stats.avgRating}</td>
-                <td>${stats.cards}</td>
+            if (stats.goals > topScorer.goals) topScorer = { name: p.name, goals: stats.goals };
+            if (stats.avgRating !== '-' && parseFloat(stats.avgRating) > topRated.rating) {
+                topRated = { name: p.name, rating: parseFloat(stats.avgRating) };
+            }
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p.name}</strong> ${p.photo ? '??' : ''}</td>
+                    <td>${stats.apps}</td>
+                    <td>? ${stats.goals}</td>
+                    <td>?? ${stats.assists}</td>
+                    <td>${stats.avgRating}</td>
+                    <td>${stats.cards}</td>
+                </tr>
             `;
         });
         
@@ -1035,6 +640,27 @@
         document.getElementById('topRated').innerHTML = `${topRated.name || '-'}<br><small>${topRated.rating} avg</small>`;
         document.getElementById('totalGoals').innerText = totalGoals;
     }
+
+    function getCurrentMonth() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function hasPaidCurrentMonth(player) {
+        return player.payments && player.payments[getCurrentMonth()] === true;
+    }
+
+    async function markPayment(playerId) {
+        if (!canEdit()) return;
+        const player = players.find(p => p._id === playerId);
+        if (player) {
+            player.payments = player.payments || {};
+            player.payments[getCurrentMonth()] = true;
+            await updatePlayer(playerId, { payments: player.payments });
+        }
+    }
+
+    window.markPayment = markPayment;
 
     function renderPayments() {
         const monthSpan = document.getElementById('paymentMonth');
@@ -1048,7 +674,7 @@
         const collected = paidCount * 70;
         const outstanding = (players.length - paidCount) * 70;
         
-        summaryDiv.innerHTML = `<strong>💰 R${collected}</strong> collected | <strong>⚠️ R${outstanding}</strong> outstanding | 📊 ${paidCount}/${players.length} players paid`;
+        summaryDiv.innerHTML = `<strong>?? R${collected}</strong> collected | <strong>?? R${outstanding}</strong> outstanding | ?? ${paidCount}/${players.length} players paid`;
         
         let html = '<table style="width:100%"><thead><tr><th>Player</th><th>Photo</th><th>Status</th><th>Action</th></tr></thead><tbody>';
         players.forEach(player => {
@@ -1056,9 +682,9 @@
             html += `
                 <tr>
                     <td>${player.name}</td>
-                    <td>${player.photo ? '<img src="'+player.photo+'" class="player-photo" style="width:30px;height:30px;border-radius:50%;object-fit:cover">' : '📸'}</td>
-                    <td>${paid ? '✅ Paid R70' : '❌ Unpaid'}</td>
-                    <td>${!paid && canEdit() ? `<button class="pay-btn" onclick="markPayment(${player.id})">💰 Pay R70</button>` : (paid ? '✔️ Done' : '🔒 View Only')}</td>
+                    <td>${player.photo ? '<img src="'+player.photo+'" class="player-photo" style="width:30px;height:30px;">' : '??'}</td>
+                    <td>${paid ? '? Paid R70' : '? Unpaid'}</td>
+                    <td>${!paid && canEdit() ? `<button class="pay-btn" onclick="markPayment('${player._id}')">?? Pay R70</button>` : (paid ? '?? Done' : '?? View Only')}</td>
                 </tr>
             `;
         });
@@ -1066,140 +692,26 @@
         paymentsList.innerHTML = html;
     }
 
-    function render() {
+    function renderAll() {
         renderPlayers();
         renderFixtures();
         renderStats();
         renderPayments();
     }
 
-    // ========== MODAL ==========
-    let currentFixtureId = null;
-
-    window.openStatsModal = function(fixtureId, opponent) {
-        currentFixtureId = fixtureId;
-        document.getElementById('modalMatchInfo').innerText = `vs ${opponent}`;
-        const formDiv = document.getElementById('matchStatsForm');
-        
-        formDiv.innerHTML = '<h4>Player Statistics:</h4>';
-        players.forEach(player => {
-            const existingStats = player.matchStats?.[fixtureId];
-            formDiv.innerHTML += `
-                <div class="player-stats-row">
-                    <strong>${player.name} (${player.position})</strong><br>
-                    Goals: <input type="number" id="goals_${player.id}" value="${existingStats?.goals || 0}" min="0" style="width:60px">
-                    Assists: <input type="number" id="assists_${player.id}" value="${existingStats?.assists || 0}" min="0" style="width:60px">
-                    Rating: <input type="number" id="rating_${player.id}" value="${existingStats?.rating || 7}" min="1" max="10" step="0.5" style="width:70px">
-                    Cards: <select id="cards_${player.id}">
-                        <option value="none" ${existingStats?.cards === 'none' ? 'selected' : ''}>None</option>
-                        <option value="yellow" ${existingStats?.cards === 'yellow' ? 'selected' : ''}>Yellow</option>
-                        <option value="red" ${existingStats?.cards === 'red' ? 'selected' : ''}>Red</option>
-                    </select>
-                </div>
-            `;
-        });
-        
-        if (!canEdit()) {
-            document.querySelectorAll('#matchStatsForm input, #matchStatsForm select').forEach(el => el.disabled = true);
-            document.getElementById('saveMatchStatsBtn').style.display = 'none';
-        } else {
-            document.getElementById('saveMatchStatsBtn').style.display = 'block';
-        }
-        
-        document.getElementById('matchStatsModal').style.display = 'block';
-    }
-
-    // ========== EVENT LISTENERS ==========
-    document.getElementById('addPlayerBtn')?.addEventListener('click', () => {
-        if (!canEdit()) return;
-        const name = document.getElementById('playerName').value;
-        const jersey = document.getElementById('playerJersey').value;
-        const position = document.getElementById('playerPosition').value;
-        const photoFile = document.getElementById('playerPhoto')?.files[0];
-        
-        if (photoFile) {
-            const reader = new FileReader();
-            reader.onload = function(e) { addPlayer(name, jersey, position, e.target.result); };
-            reader.readAsDataURL(photoFile);
-        } else {
-            addPlayer(name, jersey, position);
-        }
-    });
-
-    document.getElementById('markAllPresentBtn')?.addEventListener('click', () => canEdit() && markAllPresent());
-    document.getElementById('exportStatsCSVBtn')?.addEventListener('click', exportStatsToCSV);
-    document.getElementById('sendReportBtn')?.addEventListener('click', () => document.getElementById('reportModal').style.display = 'block');
-    
-    document.getElementById('addFixtureBtn')?.addEventListener('click', () => {
-        if (!canEdit()) return;
-        addFixture(
-            document.getElementById('fixtureOpponent').value,
-            document.getElementById('fixtureDate').value,
-            document.getElementById('fixtureVenue').value,
-            document.getElementById('fixtureLocation').value
-        );
-        document.getElementById('fixtureOpponent').value = '';
-        document.getElementById('fixtureDate').value = '';
-        document.getElementById('fixtureLocation').value = '';
-    });
-    
-    document.getElementById('saveMatchStatsBtn')?.addEventListener('click', () => {
-        if (!canEdit()) return;
-        const statsData = {};
-        players.forEach(player => {
-            statsData[player.id] = {
-                goals: parseInt(document.getElementById(`goals_${player.id}`)?.value) || 0,
-                assists: parseInt(document.getElementById(`assists_${player.id}`)?.value) || 0,
-                rating: parseFloat(document.getElementById(`rating_${player.id}`)?.value) || 7,
-                cards: document.getElementById(`cards_${player.id}`)?.value || 'none'
-            };
-        });
-        recordMatchStats(currentFixtureId, statsData);
-        document.getElementById('matchStatsModal').style.display = 'none';
-        renderFixtures();
-        renderStats();
-    });
-    
-    document.getElementById('sendReportBtnModal')?.addEventListener('click', sendReport);
-    document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    
-    document.querySelector('.close')?.addEventListener('click', () => document.getElementById('matchStatsModal').style.display = 'none');
-    document.querySelector('.close-report')?.addEventListener('click', () => document.getElementById('reportModal').style.display = 'none');
-    
-    window.onclick = function(event) {
-        if (event.target === document.getElementById('matchStatsModal')) document.getElementById('matchStatsModal').style.display = 'none';
-        if (event.target === document.getElementById('reportModal')) document.getElementById('reportModal').style.display = 'none';
-    }
-    
-    // ========== TAB SWITCHING ==========
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`${tabId}Tab`).classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.getAttribute('data-tab') === tabId) btn.classList.add('active');
-        });
-        if (tabId === 'stats') renderStats();
-        if (tabId === 'fixtures') renderFixtures();
-        if (tabId === 'payments') renderPayments();
-    }
-    
+    // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(`${tabId}Tab`).classList.add('active');
+            if (tabId === 'stats') renderStats();
+            if (tabId === 'fixtures') renderFixtures();
+            if (tabId === 'payments') renderPayments();
+        });
     });
-    
-    // Make functions global
-    window.markPayment = markPayment;
-    window.deleteFixture = deleteFixture;
-    window.editFixturePrompt = editFixturePrompt;
-    window.deletePlayer = deletePlayer;
-    window.editPlayerPrompt = editPlayerPrompt;
-    window.markAttendance = markAttendance;
-    window.openStatsModal = openStatsModal;
-    
-    // ========== INITIALIZE ==========
-    initLogin();
-    console.log('🚀 Midvaalens YD Ready!');
 </script>
 </body>
 </html>

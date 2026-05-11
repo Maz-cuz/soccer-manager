@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Midvaalens YD | Team Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 8px;
+            border-radius: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: 0.3s;
+            color: #475569;
+        }
+        .tab-btn.active {
+            background: #006B3F;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,107,63,0.3);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,107,63,0.1);
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .stat-card span {
+            display: block;
+            font-size: 2.5rem;
+            margin-top: 8px;
+            font-weight: 800;
+        }
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        input, select, button {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0055A0;
+            box-shadow: 0 0 0 3px rgba(0,85,160,0.1);
+        }
+        button {
+            background: #006B3F;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+        }
+        button:hover:not(:disabled) {
+            background: #0055A0;
+            transform: translateY(-2px);
+        }
+        .delete-btn { background: #dc2626; }
+        .delete-btn:hover { background: #b91c1c; }
+        .edit-btn { background: #f59e0b; }
+        .edit-btn:hover { background: #d97706; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        th {
+            background: #f0fdf4;
+            color: #006B3F;
+            font-weight: 700;
+        }
+        .player-photo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #006B3F;
+            background: #f1f5f9;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+        .role-admin {
+            background: #006B3F;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,107,63,0.3);
+        }
+        .role-client {
+            background: #0055A0;
+            color: white;
+        }
+        .readonly-msg {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 14px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-left: 5px solid #f59e0b;
+        }
+        .fixture-item {
+            background: #f8fafc;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: all 0.2s;
+            border-left: 5px solid #006B3F;
+        }
+        .fixture-item.completed {
+            background: #f0fdf4;
+            border-left-color: #0055A0;
+        }
+        .fixture-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 24px;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 28px;
+            max-height: 85%;
+            overflow-y: auto;
+            border-top: 6px solid #006B3F;
+        }
+        .close, .close-report {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close:hover { color: #006B3F; }
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #006B3F 0%, #0055A0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+        }
+        .login-box input, .login-box select, .login-box button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 16px;
+        }
+        .payments-summary {
+            background: linear-gradient(135deg, #e6f7ec, #e0f2fe);
+            padding: 18px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .attendance-btn {
+            padding: 6px 12px;
+            margin: 0 2px;
+            font-size: 12px;
+        }
+        .player-stats-row {
+            background: #f8fafc;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+        .fitness-fit { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-weight:600; }
+        .fitness-doubtful { background: #fef9c3; color: #854d0e; padding: 4px 10px; border-radius: 20px; }
+        .fitness-unfit { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; }
+        #adminActions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .pay-btn { background: #16a34a; }
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            th, td { font-size: 12px; padding: 8px; }
+            .tab-btn { padding: 8px 14px; font-size: 13px; }
+            .card { padding: 16px; }
+        }
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY (NO PASSWORD HINT) -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2 style="color:#006B3F;">⚽ Midvaalens YD</h2>
+        <p style="margin-bottom: 20px;">Team Management System</p>
+        <select id="roleSelect">
+            <option value="admin">👑 Admin (Full Access)</option>
+            <option value="client">👀 Player/Viewer (Read Only)</option>
+        </select>
+        <input type="password" id="adminPassword" placeholder="Admin password" />
+        <button id="loginBtn">Login</button>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Midvaalens YD</h1>
+            <p class="subtitle">Youth Development | Cloud Database</p>
+            <div id="roleBadge" class="role-badge"></div>
+            <button id="logoutBtn" style="margin-top:12px; background:#dc2626;">Logout</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="players">👥 Players</button>
+            <button class="tab-btn" data-tab="fixtures">📅 Fixtures</button>
+            <button class="tab-btn" data-tab="stats">📊 Statistics</button>
+            <button class="tab-btn" data-tab="payments">💰 Payments</button>
+        </div>
+
+        <div id="readonlyWarning" class="readonly-msg" style="display:none;">
+            ⚠️ You are in <strong>View Only Mode</strong>. You cannot add, edit, or delete data.
+        </div>
+
+        <!-- Players Tab -->
+        <div id="playersTab" class="tab-content active">
+            <div class="card" id="addPlayerCard">
+                <h2>➕ Add New Player</h2>
+                <div class="form-row">
+                    <input type="text" id="playerName" placeholder="Full name" />
+                    <input type="text" id="playerJersey" placeholder="Jersey #" />
+                    <input type="text" id="playerPosition" placeholder="Position" />
+                    <input type="file" id="playerPhoto" accept="image/*" />
+                    <button id="addPlayerBtn">Add Player</button>
+                </div>
+            </div>
+            <div class="dashboard">
+                <div class="stat-card">👥 Total Players: <span id="totalPlayers">0</span></div>
+                <div class="stat-card">✅ Today's Attendance: <span id="todayAttendance">0</span></div>
+                <div class="stat-card">💪 Fit Players: <span id="fitCount">0</span></div>
+            </div>
+            <div class="card">
+                <div class="card-header" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                    <h2>📋 Player Management</h2>
+                    <div id="adminActions">
+                        <button id="markAllPresentBtn">✅ Mark All Present</button>
+                        <button id="exportStatsCSVBtn">📥 Export Stats CSV</button>
+                        <button id="sendReportBtn">📧 Send Report</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="playerTable">
+                        <thead><tr><th>Photo</th><th>Name</th><th>Jersey</th><th>Position</th><th>Fitness</th><th>Today</th><th>Last 5</th><th>Actions</th></tr></thead>
+                        <tbody id="playerTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fixtures Tab -->
+        <div id="fixturesTab" class="tab-content">
+            <div class="card" id="addFixtureCard">
+                <h2>➕ Add New Fixture</h2>
+                <div class="form-row">
+                    <input type="text" id="fixtureOpponent" placeholder="Opponent team" />
+                    <input type="date" id="fixtureDate" />
+                    <select id="fixtureVenue"><option value="Home">Home</option><option value="Away">Away</option></select>
+                    <input type="text" id="fixtureLocation" placeholder="Venue name" />
+                    <button id="addFixtureBtn">Add Fixture</button>
+                </div>
+            </div>
+            <div class="card"><h2>📅 Upcoming Matches</h2><div id="upcomingFixtures"></div></div>
+            <div class="card"><h2>📜 Past Fixtures & Results</h2><div id="pastFixtures"></div></div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="statsTab" class="tab-content">
+            <div class="dashboard">
+                <div class="stat-card">⭐ Top Goalscorer: <span id="topScorer">-</span></div>
+                <div class="stat-card">🏆 Top Rating: <span id="topRated">-</span></div>
+                <div class="stat-card">📊 Total Goals: <span id="totalGoals">0</span></div>
+            </div>
+            <div class="card"><h2>📈 Player Statistics (Season)</h2><div style="overflow-x:auto;"><table id="statsTable"><thead><tr><th>Player</th><th>Apps</th><th>Goals</th><th>Assists</th><th>Avg Rating</th><th>Cards</th></tr></thead><tbody id="statsTableBody"></tbody></table></div></div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div id="paymentsTab" class="tab-content">
+            <div class="card">
+                <h2>💰 Monthly Payments (R70)</h2>
+                <p>Current month: <strong id="paymentMonth"></strong></p>
+                <div id="paymentsSummary" class="payments-summary"></div>
+                <div id="paymentsList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="matchStatsModal" class="modal"><div class="modal-content"><span class="close">&times;</span><h2>📝 Record Match Stats</h2><h3 id="modalMatchInfo"></h3><div id="matchStatsForm"></div><button id="saveMatchStatsBtn">Save Statistics</button></div></div>
+<div id="reportModal" class="modal"><div class="modal-content"><span class="close-report">&times;</span><h2>📧 Send Match Report</h2><div class="form-row"><select id="reportFixtureSelect"><option value="">Select fixture...</option></select><select id="reportMethod"><option value="whatsapp">WhatsApp</option><option value="email">Email</option></select><input type="text" id="reportRecipient" placeholder="Phone number or email" /><button id="sendReportBtnModal">Send Report</button></div><div id="reportPreview"></div></div></div>
+
+<script>
+    // ======================== BACKEND API CONFIGURATION ========================
+    // 🔁 CHANGE THIS TO YOUR ACTUAL BACKEND URL WHEN DEPLOYED (Render, Railway, etc.)
+    // For local testing with Node server: http://localhost:5000/api
+    const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://midvaalens-backend.onrender.com/api';
+    
+    let currentRole = null;
+    let currentSessionDate = new Date().toISOString().split('T')[0];
+    let players = [];
+    let fixtures = [];
+
+    // Helper UI
+    function showLoading() { let div = document.createElement('div'); div.id = 'loadingOverlay'; div.innerHTML = '⏳ Loading data... ⚽'; document.body.appendChild(div); }
+    function hideLoading() { let el = document.getElementById('loadingOverlay'); if(el) el.remove(); }
+
+    // Auth
+    async function initLogin() {
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const role = document.getElementById('roleSelect').value;
+            const pwd = document.getElementById('adminPassword').value;
+            try {
+                const res = await fetch(`${API_URL}/auth`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role, password: pwd })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentRole = data.role;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    updateRoleUI();
+                    await loadAllData();
+                } else alert('Wrong admin password!');
+            } catch(err) { alert('Cannot connect to server. Make sure backend is running.'); console.error(err); }
+        });
+    }
+
+    function logout() { currentRole = null; document.getElementById('mainApp').style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; document.getElementById('adminPassword').value = ''; }
+    function canEdit() { return currentRole === 'admin'; }
+    function updateRoleUI() {
+        const badge = document.getElementById('roleBadge');
+        badge.innerHTML = canEdit() ? '👑 Admin Mode - Full Access' : '👁️ Client Mode - View Only';
+        badge.className = canEdit() ? 'role-badge role-admin' : 'role-badge role-client';
+        document.getElementById('readonlyWarning').style.display = canEdit() ? 'none' : 'block';
+        document.getElementById('addPlayerCard').style.display = canEdit() ? 'block' : 'none';
+        document.getElementById('addFixtureCard').style.display = canEdit() ? 'block' : 'none';
+        document.getElementById('adminActions').style.display = canEdit() ? 'flex' : 'none';
+    }
+
+    // API Calls
+    async function loadAllData() {
+        showLoading();
+        try {
+            const [playersRes, fixturesRes] = await Promise.all([fetch(`${API_URL}/players`), fetch(`${API_URL}/fixtures`)]);
+            players = await playersRes.json();
+            fixtures = await fixturesRes.json();
+            if (players.length === 0) await seedSampleData();
+            renderAll();
+        } catch(e) { console.error(e); alert('Failed to load data from cloud.'); }
+        finally { hideLoading(); }
+    }
+
+    async function seedSampleData() {
+        const samplePlayers = [
+            { name:"Thabo Nkosi", jersey:"10", position:"Forward", fitness:"fit", attendance:{}, payments:{}, matchStats:{}, photo:null },
+            { name:"Sipho Dlamini", jersey:"5", position:"Defender", fitness:"fit", attendance:{}, payments:{}, matchStats:{}, photo:null },
+            { name:"Lerato Molefe", jersey:"7", position:"Midfielder", fitness:"fit", attendance:{}, payments:{}, matchStats:{}, photo:null },
+            { name:"Michael Johnson", jersey:"9", position:"Forward", fitness:"fit", attendance:{}, payments:{}, matchStats:{}, photo:null }
+        ];
+        for (let p of samplePlayers) await fetch(`${API_URL}/players`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
+        const today = new Date().toISOString().split('T')[0];
+        const nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate()+7);
+        const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate()-7);
+        const sampleFixtures = [
+            { opponent:"Sundowns FC", date:lastWeek.toISOString().split('T')[0], venue:"Home", location:"Midvaal Stadium", isCompleted:true, result:{homeScore:2, awayScore:1}, matchStatsRecorded:true },
+            { opponent:"Chiefs United", date:today, venue:"Away", location:"FNB Stadium", isCompleted:false, result:null, matchStatsRecorded:false },
+            { opponent:"Pirates Academy", date:nextWeek.toISOString().split('T')[0], venue:"Home", location:"Midvaal Stadium", isCompleted:false, result:null, matchStatsRecorded:false }
+        ];
+        for (let f of sampleFixtures) await fetch(`${API_URL}/fixtures`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(f) });
+        await loadAllData();
+    }
+
+    async function addPlayerToDB(name, jersey, position, photoBase64) {
+        if (!canEdit()) return;
+        const res = await fetch(`${API_URL}/players`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name, jersey, position, fitness:'fit', attendance:{}, payments:{}, matchStats:{}, photo:photoBase64 }) });
+        if(res.ok) { await loadAllData(); }
+        else alert('Error adding player');
+    }
+
+    async function deletePlayerDB(id) { if(confirm('Delete player?')){ await fetch(`${API_URL}/players/${id}`, {method:'DELETE'}); await loadAllData(); } }
+    async function updatePlayerDB(id, data) { await fetch(`${API_URL}/players/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); await loadAllData(); }
+    async function addFixtureDB(opp, date, venue, loc) { await fetch(`${API_URL}/fixtures`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ opponent:opp, date, venue, location:loc, isCompleted:false, result:null, matchStatsRecorded:false }) }); await loadAllData(); }
+    async function deleteFixtureDB(id) { if(confirm('Delete fixture?')){ await fetch(`${API_URL}/fixtures/${id}`, {method:'DELETE'}); await loadAllData(); } }
+    async function updateFixtureDB(id, data) { await fetch(`${API_URL}/fixtures/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); await loadAllData(); }
+
+    async function markAttendanceDB(playerId, status) {
+        const player = players.find(p => p._id === playerId);
+        if(player) { player.attendance = player.attendance || {}; player.attendance[currentSessionDate] = status; await updatePlayerDB(playerId, { attendance: player.attendance }); }
+    }
+    async function markAllPresentDB() { for(let p of players) { p.attendance = p.attendance || {}; p.attendance[currentSessionDate] = 'present'; await updatePlayerDB(p._id, { attendance: p.attendance }); } renderAll(); }
+    async function updateFitnessDB(id, fit) { await updatePlayerDB(id, { fitness: fit }); }
+    async function recordMatchStatsDB(fixtureId, statsMap) {
+        for(let [pid, stats] of Object.entries(statsMap)) {
+            let player = players.find(p => p._id === pid);
+            if(player) { player.matchStats = player.matchStats || {}; player.matchStats[fixtureId] = stats; await updatePlayerDB(pid, { matchStats: player.matchStats }); }
+        }
+        await updateFixtureDB(fixtureId, { matchStatsRecorded: true });
+        await loadAllData();
+    }
+    async function markPaymentDB(playerId) { let p = players.find(p => p._id === playerId); if(p) { p.payments = p.payments || {}; p.payments[getCurrentMonth()] = true; await updatePlayerDB(playerId, { payments: p.payments }); renderAll(); } }
+
+    // Helper functions
+    function getCurrentMonth() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+    function hasPaidCurrentMonth(p) { return p.payments && p.payments[getCurrentMonth()] === true; }
+    function getLast5Attendance(player) { if(!player.attendance) return []; return Object.keys(player.attendance).sort().reverse().slice(0,5).map(d=>player.attendance[d]); }
+    function getPlayerSeasonStats(player) {
+        let apps=0, goals=0, assists=0, totalRating=0, ratingCount=0, cards={yellow:0,red:0};
+        if(player.matchStats) Object.values(player.matchStats).forEach(stat=>{ apps++; goals+=stat.goals||0; assists+=stat.assists||0; if(stat.rating){ totalRating+=stat.rating; ratingCount++; } if(stat.cards==='yellow') cards.yellow++; if(stat.cards==='red') cards.red++; });
+        let avgRating = ratingCount>0 ? (totalRating/ratingCount).toFixed(1) : '-';
+        let cardStr = (cards.yellow||cards.red) ? `🟨${cards.yellow} 🟥${cards.red}` : '-';
+        return { apps, goals, assists, avgRating, cards:cardStr };
+    }
+
+    // Renders
+    function renderPlayers() {
+        let tbody = document.getElementById('playerTableBody'); if(!tbody) return;
+        let todayPresent = players.filter(p => p.attendance?.[currentSessionDate] === 'present').length;
+        document.getElementById('totalPlayers').innerText = players.length;
+        document.getElementById('todayAttendance').innerText = todayPresent;
+        document.getElementById('fitCount').innerText = players.filter(p=>p.fitness==='fit').length;
+        tbody.innerHTML = '';
+        players.forEach(p => {
+            let todayStatus = p.attendance?.[currentSessionDate] || 'not marked';
+            let last5 = getLast5Attendance(p).map(s=> s==='present'?'✅':s==='absent'?'❌':'⬜').join('');
+            let row = tbody.insertRow();
+            row.insertCell(0).innerHTML = p.photo ? `<img src="${p.photo}" class="player-photo">` : '📸';
+            row.insertCell(1).innerText = p.name;
+            row.insertCell(2).innerText = p.jersey;
+            row.insertCell(3).innerText = p.position;
+            let fitCell = row.insertCell(4);
+            if(canEdit()) {
+                let sel = document.createElement('select'); sel.className='fitness-select'; ['fit','doubtful','unfit'].forEach(opt=>{ let op = document.createElement('option'); op.value=opt; op.innerText=opt.charAt(0).toUpperCase()+opt.slice(1); if(p.fitness===opt) op.selected=true; sel.appendChild(op); });
+                sel.onchange = (e)=> updateFitnessDB(p._id, e.target.value);
+                fitCell.appendChild(sel);
+            } else fitCell.innerHTML = `<span class="fitness-${p.fitness}">${p.fitness}</span>`;
+            row.insertCell(5).innerHTML = todayStatus==='present'?'✅ Present':todayStatus==='absent'?'❌ Absent':'⚪';
+            row.insertCell(6).innerHTML = last5 || '⬜⬜⬜⬜⬜';
+            let actionCell = row.insertCell(7);
+            if(canEdit()) actionCell.innerHTML = `<button class="attendance-btn" onclick="markAttendanceDB('${p._id}', 'present')">✅</button><button class="attendance-btn absent" onclick="markAttendanceDB('${p._id}', 'absent')">❌</button><button class="edit-btn" onclick="editPlayerName('${p._id}','${p.name}')">✏️</button><button class="delete-btn" onclick="deletePlayerDB('${p._id}')">🗑️</button>`;
+            else actionCell.innerHTML = '👁️ Read Only';
+        });
+    }
+    window.editPlayerName = async (id, oldName) => { let newName = prompt('Edit name:', oldName); if(newName) await updatePlayerDB(id, { name: newName }); };
+    window.markAttendanceDB = markAttendanceDB;
+    window.deletePlayerDB = deletePlayerDB;
+
+    function renderFixtures() {
+        let upcomingDiv = document.getElementById('upcomingFixtures'), pastDiv = document.getElementById('pastFixtures');
+        let today = new Date().toISOString().split('T')[0];
+        let upcoming = fixtures.filter(f => !f.isCompleted && f.date >= today);
+        let past = fixtures.filter(f => f.isCompleted || f.date < today);
+        upcomingDiv.innerHTML = upcoming.length ? '' : '<p>No upcoming fixtures</p>';
+        upcoming.forEach(f => { upcomingDiv.innerHTML += `<div class="fixture-item"><div><strong>${f.opponent}</strong><br>📅 ${f.date} | ${f.venue} at ${f.location}</div><div class="fixture-actions">${canEdit()?`<button class="edit-btn" onclick="editFixturePrompt('${f._id}')">✏️</button><button class="delete-btn" onclick="deleteFixtureDB('${f._id}')">🗑️</button><button onclick="openStatsModal('${f._id}','${f.opponent}')">📊 Stats</button>`:`<button onclick="openStatsModal('${f._id}','${f.opponent}')">👁️ View</button>`}</div></div>`; });
+        pastDiv.innerHTML = past.length ? '' : '<p>No past fixtures</p>';
+        past.forEach(f => { pastDiv.innerHTML += `<div class="fixture-item completed"><div><strong>${f.opponent}</strong><br>📅 ${f.date}<br>🏆 Result: ${f.result?`${f.result.homeScore} - ${f.result.awayScore}`:'No result'}</div><div class="fixture-actions">${canEdit() && !f.matchStatsRecorded?`<button onclick="openStatsModal('${f._id}','${f.opponent}')">📊 Record</button>`:''}${canEdit()?`<button class="delete-btn" onclick="deleteFixtureDB('${f._id}')">🗑️</button>`:''}</div></div>`; });
+        let select = document.getElementById('reportFixtureSelect');
+        if(select){ select.innerHTML='<option value="">Select fixture...</option>'; [...upcoming,...past].forEach(f=>{ select.innerHTML+=`<option value="${f._id}">${f.opponent} (${f.date})</option>`; }); }
+    }
+    window.editFixturePrompt = async (id) => { let fix = fixtures.find(f=>f._id===id); if(!fix) return; let newOpp=prompt('Opponent:',fix.opponent), newDate=prompt('Date:',fix.date), newVen=prompt('Venue:',fix.venue), newLoc=prompt('Location:',fix.location); if(newOpp && newDate) await updateFixtureDB(id, { opponent:newOpp, date:newDate, venue:newVen, location:newLoc }); };
+    window.deleteFixtureDB = deleteFixtureDB;
+
+    function renderStats() {
+        let tbody = document.getElementById('statsTableBody'); if(!tbody) return;
+        let topScorer={name:'',goals:0}, topRated={name:'',rating:0}, totalGoals=0;
+        tbody.innerHTML='';
+        players.forEach(p=>{ let s=getPlayerSeasonStats(p); totalGoals+=s.goals; if(s.goals>topScorer.goals) topScorer={name:p.name,goals:s.goals}; if(s.avgRating!=='-' && parseFloat(s.avgRating)>topRated.rating) topRated={name:p.name,rating:parseFloat(s.avgRating)}; tbody.innerHTML+=`<tr><td><strong>${p.name}</strong></td><td>${s.apps}</td><td>⭐ ${s.goals}</td><td>🎯 ${s.assists}</td><td>${s.avgRating}</td><td>${s.cards}</td></tr>`; });
+        document.getElementById('topScorer').innerHTML = `${topScorer.name || '-'}<br><small>${topScorer.goals} goals</small>`;
+        document.getElementById('topRated').innerHTML = `${topRated.name || '-'}<br><small>${topRated.rating} avg</small>`;
+        document.getElementById('totalGoals').innerText = totalGoals;
+    }
+    function renderPayments() {
+        let monthSpan = document.getElementById('paymentMonth'), summary=document.getElementById('paymentsSummary'), listDiv=document.getElementById('paymentsList');
+        let month = getCurrentMonth(); monthSpan.innerText=month;
+        let paidCount = players.filter(p=>hasPaidCurrentMonth(p)).length;
+        let collected = paidCount*70, outstanding = (players.length-paidCount)*70;
+        summary.innerHTML = `<strong>💰 R${collected}</strong> collected | <strong>⚠️ R${outstanding}</strong> outstanding | 📊 ${paidCount}/${players.length} players paid`;
+        let html = '<table><thead><tr><th>Player</th><th>Photo</th><th>Status</th><th>Action</th></tr></
