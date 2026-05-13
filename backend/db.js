@@ -1,32 +1,20 @@
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+const mysql = require('mysql2');
+require('dotenv').config();
 
-// Load environment variables
-dotenv.config();
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+});
 
-// Check if MONGODB_URI exists
-const uri = process.env.MONGODB_URI;
-
-if (!uri) {
-    console.error('❌ MONGODB_URI is not defined in .env file');
-    console.error('Please add: MONGODB_URI=your_mongodb_connection_string');
-    process.exit(1);
-}
-
-console.log('✅ MONGODB_URI found, connecting...');
-
-const client = new MongoClient(uri);
-
-async function connect() {
-    try {
-        await client.connect();
-        console.log('✅ Connected to MongoDB');
-        const db = client.db();
-        return db;
-    } catch (error) {
-        console.error('❌ Connection error:', error.message);
-        process.exit(1);
+db.connect((err) => {
+    if (err) {
+        console.log('❌ DB connection failed:', err);
+    } else {
+        console.log('⚽ Connected to MySQL soccer_manager database!');
     }
-}
+});
 
-export { connect, client };
+module.exports = db;
