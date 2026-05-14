@@ -4,29 +4,35 @@ const db = require('./db');
 
 const app = express();
 
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(cors());
 app.use(express.json());
 
 /* =========================
-   HOME
+   HOME ROUTE
 ========================= */
 app.get('/', (req, res) => {
-    res.send('⚽ Soccer League API Running');
+    res.send('⚽ Soccer League API Running (Render Ready)');
 });
 
 /* =========================
    PLAYERS API
 ========================= */
 
-// GET all players
+// Get all players
 app.get('/players', (req, res) => {
     db.query('SELECT * FROM players', (err, results) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to fetch players' });
+        }
         res.json(results);
     });
 });
 
-// ADD player
+// Add player
 app.post('/players', (req, res) => {
     const { first_name, last_name, position, age, division } = req.body;
 
@@ -36,7 +42,10 @@ app.post('/players', (req, res) => {
     `;
 
     db.query(query, [first_name, last_name, position, age, division], (err, result) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to add player' });
+        }
         res.json({ message: 'Player added', id: result.insertId });
     });
 });
@@ -45,7 +54,7 @@ app.post('/players', (req, res) => {
    ATTENDANCE API
 ========================= */
 
-// AUTO create attendance (all absent today)
+// Auto create attendance (all absent today)
 app.post('/attendance/auto', (req, res) => {
     const query = `
         INSERT INTO attendance (player_id, attendance_date, status)
@@ -53,12 +62,15 @@ app.post('/attendance/auto', (req, res) => {
     `;
 
     db.query(query, (err) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to create attendance' });
+        }
         res.json({ message: 'Attendance created for today' });
     });
 });
 
-// MARK attendance
+// Mark attendance
 app.post('/attendance/mark', (req, res) => {
     const { player_id, status } = req.body;
 
@@ -69,12 +81,15 @@ app.post('/attendance/mark', (req, res) => {
     `;
 
     db.query(query, [status, player_id], (err) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to update attendance' });
+        }
         res.json({ message: 'Attendance updated' });
     });
 });
 
-// GET attendance
+// Get attendance
 app.get('/attendance', (req, res) => {
     const query = `
         SELECT players.first_name, players.last_name,
@@ -85,24 +100,30 @@ app.get('/attendance', (req, res) => {
     `;
 
     db.query(query, (err, results) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to fetch attendance' });
+        }
         res.json(results);
     });
 });
 
 /* =========================
-   PAYMENTS API (R70 TRACKER)
+   PAYMENTS API (R70 SYSTEM)
 ========================= */
 
-// GET all payments
+// Get payments
 app.get('/payments', (req, res) => {
     db.query('SELECT * FROM payments', (err, results) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to fetch payments' });
+        }
         res.json(results);
     });
 });
 
-// CREATE monthly unpaid records
+// Generate payments
 app.post('/payments/generate', (req, res) => {
     const query = `
         INSERT INTO payments (player_id, amount, status)
@@ -110,12 +131,15 @@ app.post('/payments/generate', (req, res) => {
     `;
 
     db.query(query, (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: 'Payment records created' });
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to generate payments' });
+        }
+        res.json({ message: 'Payment records generated' });
     });
 });
 
-// MARK payment as paid
+// Mark as paid
 app.post('/payments/pay', (req, res) => {
     const { player_id } = req.body;
 
@@ -126,8 +150,11 @@ app.post('/payments/pay', (req, res) => {
     `;
 
     db.query(query, [player_id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: 'Player marked as paid' });
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to update payment' });
+        }
+        res.json({ message: 'Payment marked as paid' });
     });
 });
 
@@ -135,15 +162,18 @@ app.post('/payments/pay', (req, res) => {
    STATS API
 ========================= */
 
-// GET stats
+// Get stats
 app.get('/stats', (req, res) => {
     db.query('SELECT * FROM player_stats', (err, results) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to fetch stats' });
+        }
         res.json(results);
     });
 });
 
-// UPDATE stats
+// Update stats
 app.post('/stats/update', (req, res) => {
     const { player_id, goals, assists } = req.body;
 
@@ -154,14 +184,20 @@ app.post('/stats/update', (req, res) => {
     `;
 
     db.query(query, [goals, assists, player_id], (err) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to update stats' });
+        }
         res.json({ message: 'Stats updated' });
     });
 });
 
 /* =========================
-   SERVER START
+   START SERVER (RENDER READY)
 ========================= */
-app.listen(3000, () => {
-    console.log('🚀 Soccer API running on http://localhost:3000');
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
