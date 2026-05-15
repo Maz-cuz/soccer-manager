@@ -1,7 +1,7 @@
 // ========== API CONFIGURATION ==========
 // Change this to your backend URL when deployed
-const API_URL = 'http://localhost:5000/api'; // For local development
-// const API_URL = 'https://your-backend.onrender.com/api'; // For production
+//const API_URL = 'http://localhost:5000/api'; // For local development
+/const API_URL = 'https://soccer-manager-61iv.onrender.com' // For production
 
 // ========== ROLE BASED ACCESS CONTROL ==========
 let currentRole = null;

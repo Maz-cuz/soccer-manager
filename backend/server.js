@@ -1,8 +1,26 @@
-﻿const express = require('express');
+﻿require('dotenv').config();
+
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
+const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 
 const app = express();
+
+const express = require('express');
+const cors = require('cors');
+const db = require('./db');
+
+const app = express();
+
+app.use(cors({
+    origin: '*'
+}));
+
+app.use(express.json());
 
 /* =========================
    MIDDLEWARE
@@ -22,7 +40,7 @@ app.get('/', (req, res) => {
 ========================= */
 
 // Get all players
-app.get('/players', (req, res) => {
+app.get('/api/players', (req, res) => {
     db.query('SELECT * FROM players', (err, results) => {
         if (err) {
             console.log(err);
@@ -201,3 +219,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
