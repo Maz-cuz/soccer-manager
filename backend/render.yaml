@@ -1,9 +1,9 @@
 services:
   - type: web
     name: soccer-manager
-    env: node
+    runtime: node
     buildCommand: npm install
-    startCommand: node backend/server.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production

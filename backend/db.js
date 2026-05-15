@@ -6,15 +6,16 @@ const db = mysql.createConnection({
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
-    port: process.env.MYSQLPORT
+    port: Number(process.env.MYSQLPORT)
 });
 
 db.connect((err) => {
     if (err) {
-        console.error('❌ MySQL connection failed:', err.message);
+        console.error('MySQL connection failed:', err.message);
         return;
     }
-    console.log('✅ MySQL connected successfully!');
+
+    console.log('MySQL connected successfully');
 });
 
 module.exports = db;
