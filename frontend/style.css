@@ -1,4 +1,3 @@
-<style>
 *{
     margin:0;
     padding:0;
@@ -6,106 +5,93 @@
 }
 
 body{
-    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
-    background:linear-gradient(135deg,#006B3F,#0055A0);
+    font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#0b5d3b,#0a3d62);
     min-height:100vh;
-    padding:20px;
+    padding:16px;
+    color:#0f172a;
 }
 
+/* APP CONTAINER */
 .container{
     max-width:1200px;
     margin:0 auto;
 }
 
-.header{
+/* HEADER BANNER */
+.team-banner{
+    background:linear-gradient(135deg,#062b18,#0b4b2a);
     color:white;
+    padding:22px;
+    border-radius:18px;
+    margin-bottom:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+}
+
+.team-banner h2{
+    font-size:1.4rem;
+    margin-bottom:4px;
+}
+
+/* DASHBOARD */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.stat{
+    background:#062b18;
+    color:white;
+    border-radius:14px;
+    padding:16px;
     text-align:center;
-    margin-bottom:24px;
+    font-weight:700;
+    box-shadow:0 6px 15px rgba(0,0,0,0.15);
 }
 
-.header h1{
-    font-size:2.4rem;
+.stat span{
+    display:block;
+    font-size:1.8rem;
+    margin-top:6px;
+    color:#4ade80;
 }
 
+/* CARDS */
 .card{
     background:white;
     border-radius:16px;
-    padding:22px;
-    margin-bottom:20px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.12);
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
 }
 
-/* TABS */
-.tabs{
-    display:flex;
-    gap:8px;
-    background:white;
-    padding:8px;
-    border-radius:14px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
+.card h3{
+    margin-bottom:12px;
 }
 
-.tab-btn{
-    flex:1;
-    min-width:120px;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#f1f5f9;
-    color:#334155;
-    cursor:pointer;
-    font-weight:700;
-}
-
-.tab-btn.active{
-    background:#006B3F;
-    color:white;
-}
-
-/* CONTENT */
-.tab-content{
-    display:none;
-}
-
-.tab-content.active{
-    display:block;
-}
-
-/* FORMS */
+/* QUICK ACTIONS */
 .form-row{
     display:flex;
-    gap:10px;
     flex-wrap:wrap;
-    margin-top:14px;
-}
-
-.form-row input,
-.form-row select,
-.form-row button{
-    flex:1 1 180px;
-}
-
-input,
-select,
-button{
-    padding:12px;
-    border-radius:10px;
-    border:2px solid #e2e8f0;
-    font-size:14px;
+    gap:10px;
 }
 
 button{
-    background:#006B3F;
-    color:white;
+    padding:10px 14px;
     border:none;
-    cursor:pointer;
+    border-radius:10px;
+    background:#16a34a;
+    color:white;
     font-weight:700;
-    transition:.2s;
+    cursor:pointer;
+    transition:0.2s ease;
 }
 
 button:hover{
-    background:#0055A0;
+    background:#15803d;
+    transform:translateY(-1px);
 }
 
 .danger{
@@ -116,150 +102,186 @@ button:hover{
     background:#b91c1c;
 }
 
-/* TABLES */
-.table-wrap{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
+/* INPUTS */
+input,select{
+    padding:10px 12px;
+    border-radius:10px;
+    border:2px solid #e2e8f0;
+    outline:none;
+    font-size:14px;
 }
 
+input:focus{
+    border-color:#16a34a;
+}
+
+/* TABLE WRAPPER */
+.table-wrap{
+    overflow-x:auto;
+    border-radius:12px;
+}
+
+/* TABLE */
 table{
     width:100%;
     border-collapse:collapse;
-    margin-top:14px;
-    min-width:600px;
+    min-width:900px;
 }
 
 th,td{
     padding:12px;
     border-bottom:1px solid #e2e8f0;
-    text-align:left;
+    text-align:center;
 }
 
 th{
     background:#f0fdf4;
-    color:#006B3F;
+    color:#166534;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
 }
 
-/* DASHBOARD */
-.dashboard{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:14px;
-    margin-bottom:20px;
+/* TABS */
+.tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
 }
 
-.stat{
-    background:white;
-    border-radius:14px;
-    padding:18px;
-    text-align:center;
+.tab-btn{
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    background:#e2e8f0;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.tab-btn.active{
+    background:#16a34a;
+    color:white;
+}
+
+/* ATTENDANCE GRID BUTTONS */
+.attendance-box{
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    border:none;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    transition:0.2s ease;
+    color:white;
+}
+
+/* EMPTY */
+.attendance-box.empty{
+    background:#94a3b8;
+}
+
+/* PRESENT */
+.attendance-box.present{
+    background:#22c55e;
+}
+
+/* ABSENT */
+.attendance-box.absent{
+    background:#ef4444;
+}
+
+.attendance-box:hover{
+    transform:scale(1.08);
+}
+
+/* PERCENTAGE */
+.attendance-percent{
     font-weight:800;
-}
-
-.stat span{
-    display:block;
-    font-size:2rem;
-    color:#006B3F;
-    margin-top:6px;
+    color:#16a34a;
 }
 
 /* LOGIN */
 #loginOverlay{
     position:fixed;
     inset:0;
-    background:linear-gradient(135deg,#006B3F,#0055A0);
+    background:linear-gradient(135deg,#0b5d3b,#0a3d62);
     display:flex;
     align-items:center;
     justify-content:center;
-    z-index:50;
-    padding:15px;
+    z-index:999;
+    padding:14px;
 }
 
 .login-box{
     background:white;
-    padding:32px;
-    border-radius:20px;
+    padding:28px;
+    border-radius:18px;
     width:100%;
     max-width:360px;
-    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
 }
 
-.login-box input,
-.login-box select,
-.login-box button{
-    width:100%;
-    margin-top:10px;
-}
-
+/* ERROR */
 .error{
     color:#dc2626;
     margin-top:10px;
-}
-
-.readonly{
-    background:#fef3c7;
-    color:#92400e;
-    padding:12px;
-    border-radius:12px;
-    margin-bottom:16px;
-    font-weight:700;
-    display:none;
+    font-weight:600;
 }
 
 /* MOBILE */
-@media(max-width:700px){
+@media(max-width:768px){
 
     body{
         padding:10px;
     }
 
-    .header h1{
-        font-size:1.7rem;
-    }
-
-    .card{
-        padding:16px;
-    }
-
-    .tabs{
-        flex-direction:column;
-    }
-
-    .tab-btn{
-        width:100%;
-    }
-
-    .form-row{
-        flex-direction:column;
-    }
-
-    .form-row input,
-    .form-row button,
-    .form-row select{
-        width:100%;
-    }
-
-    .dashboard{
-        grid-template-columns:1fr;
+    .team-banner h2{
+        font-size:1.1rem;
     }
 
     table{
-        min-width:500px;
+        min-width:700px;
     }
 
-    th,td{
-        font-size:12px;
-        padding:8px;
+    .stat span{
+        font-size:1.5rem;
     }
 
     button{
-        width:100%;
-        margin-top:6px;
-    }
-
-    td button{
         width:auto;
-        margin:2px;
+        font-size:13px;
     }
 }
-</style>
+
+.attendance-cell {
+    cursor: pointer;
+    text-align: center;
+    font-size: 18px;
+    padding: 8px;
+    user-select: none;
+}
+
+.attendance-cell.present {
+    background: #16a34a33;
+}
+
+.attendance-cell.absent {
+    background: #dc262633;
+}
+
+table {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    table {
+        font-size: 12px;
+    }
+
+    .attendance-cell {
+        font-size: 16px;
+        padding: 6px;
+    }
+}

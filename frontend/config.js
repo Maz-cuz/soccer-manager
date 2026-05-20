@@ -1,9 +1,9 @@
 ﻿// API Configuration
 // For local development with backend running on your computer:
-//const API_URL = 'http://localhost:5000/api';
+// const API_URL = 'http://localhost:3000/api';
 
-// For production (when deployed to Netlify + Render):
- const API_URL = 'https://midvaalens-backend.onrender.com/api';
+// For production:
+const API_URL = 'https://soccer-manager-61iv.onrender.com/api';
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
