@@ -1,10 +1,11 @@
 {
-  "name": "soccer-manager",
+  "name": "soccer-manager-root",
   "version": "1.0.0",
-  "main": "server.js",
+  "private": true,
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -13,7 +14,7 @@
     "multer": "^2.1.1",
     "mysql2": "^3.22.3"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.10"
+  "engines": {
+    "node": ">=18"
   }
 }

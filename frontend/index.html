@@ -1,532 +1,1034 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midvaalens YD | Soccer Manager</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #006B3F, #0055A0);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { color: white; text-align: center; margin-bottom: 24px; }
-        .header h1 { font-size: 2.4rem; }
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 22px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-        .tabs {
-            display: flex;
-            gap: 8px;
-            background: white;
-            padding: 8px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #334155;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        .tab-btn.active { background: #006B3F; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-        input, select, button {
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-            font-size: 14px;
-        }
-        button {
-            background: #006B3F;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        button:hover { background: #0055A0; }
-        .danger { background: #dc2626; }
-        .danger:hover { background: #b91c1c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #f0fdf4; color: #006B3F; }
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-        .stat {
-            background: white;
-            border-radius: 14px;
-            padding: 18px;
-            text-align: center;
-            font-weight: 800;
-        }
-        .stat span { display: block; font-size: 2rem; color: #006B3F; margin-top: 6px; }
-        #loginOverlay {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #006B3F, #0055A0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        .login-box {
-            background: white;
-            padding: 32px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 360px;
-            text-align: center;
-        }
-        .login-box input, .login-box select, .login-box button {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .error { color: #dc2626; margin-top: 10px; }
-        .readonly {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            font-weight: 700;
-            display: none;
-        }
-        @media (max-width: 700px) {
-            body { padding: 12px; }
-            th, td { font-size: 12px; padding: 8px; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Midvaalens YD | Soccer Manager</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: linear-gradient(135deg, #0b3d2e, #0a2a5e);
+    min-height: 100vh;
+    padding: 12px;
+    color: #fff;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.team-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.team-logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: white;
+}
+
+.card {
+    background: #fff;
+    color: #111;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.stat {
+    background: white;
+    color: black;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.stat span {
+    display: block;
+    font-size: 20px;
+    color: #00c853;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    border: none;
+    background: #ddd;
+    color: #111;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background: #00c853;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+input,
+select {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+textarea {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    min-height: 70px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkbox-row input {
+    width: auto;
+    margin: 0;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.media-item {
+    background: #f6f6f6;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.media-item img,
+.media-item video {
+    width: 100%;
+    max-height: 220px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #111;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 13px;
+    text-align: left;
+}
+
+th {
+    background: #f2f2f2;
+    color: black;
+}
+
+.att-box {
+    display: flex;
+    gap: 4px;
+}
+
+.block {
+    width: 24px;
+    height: 24px;
+    background: #ccc;
+    color: #111;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 24px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.block.present {
+    background: #00c853;
+    color: white;
+}
+
+.block.absent {
+    background: #e53935;
+    color: white;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #00c853;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.danger {
+    background: #e53935;
+}
+
+.muted {
+    color: #666;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.error {
+    color: #e53935;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0b3d2e, #0a2a5e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    z-index: 10;
+}
+
+.login-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    color: black;
+    width: 320px;
+}
+
+@media (max-width: 700px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        font-size: 12px;
+    }
+}
+</style>
 </head>
+
 <body>
+
+<!-- LOGIN -->
 <div id="loginOverlay">
     <div class="login-box">
         <h2>Midvaalens YD</h2>
-        <p>Soccer Manager</p>
+
         <select id="roleSelect">
             <option value="admin">Admin</option>
             <option value="client">Viewer</option>
-            
         </select>
-        <input type="password" id="adminPassword" placeholder="Admin password">
+
+        <input type="password" id="adminPassword" placeholder="Password">
+
         <button onclick="login()">Login</button>
-        <div id="loginError" class="error"></div>
+        <p id="loginError" class="error"></p>
     </div>
 </div>
 
 <div id="mainApp" style="display:none;">
     <div class="container">
+
         <div class="header">
-            <h1>Midvaalens YD</h1>
+            <div class="team-banner">
+                <div class="team-logo"></div>
+                <h1>Midvaalens YD</h1>
+            </div>
             <p id="roleText"></p>
             <button class="danger" onclick="logout()">Logout</button>
         </div>
 
-        <div id="readonlyWarning" class="readonly">View only mode. You cannot add, edit, or delete data.</div>
+        <div class="dashboard">
+            <div class="stat">Players<span id="totalPlayers">0</span></div>
+            <div class="stat">Present<span id="presentToday">0</span></div>
+            <div class="stat">Paid<span id="paidCount">0</span></div>
+        </div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('players')">Players</button>
             <button class="tab-btn" onclick="showTab('attendance')">Attendance</button>
             <button class="tab-btn" onclick="showTab('payments')">Payments</button>
             <button class="tab-btn" onclick="showTab('stats')">Stats</button>
-        </div>
-
-        <div class="dashboard">
-            <div class="stat">Players <span id="totalPlayers">0</span></div>
-            <div class="stat">Present Today <span id="presentToday">0</span></div>
-            <div class="stat">Paid This Month <span id="paidCount">0</span></div>
+            <button class="tab-btn" onclick="showTab('records')">Records</button>
+            <button class="tab-btn" onclick="showTab('media')">Media</button>
         </div>
 
         <div id="playersTab" class="tab-content active">
             <div class="card admin-only">
-                <h2>Add Player</h2>
-                <div class="form-row">
-                    <input id="firstName" placeholder="First name">
-                    <input id="lastName" placeholder="Last name">
-                    <input id="position" placeholder="Position">
-                    <input id="age" type="number" placeholder="Age">
-                    <input id="division" placeholder="Division">
-                    <button onclick="addPlayer()">Add</button>
-                </div>
+                <h3>Add Player</h3>
+                <input id="firstName" placeholder="First name" />
+                <input id="lastName" placeholder="Last name" />
+                <input id="position" placeholder="Position" />
+                <input id="age" type="number" placeholder="Age" />
+                <input id="division" placeholder="Division" />
+                <button onclick="addPlayer()">Add Player</button>
             </div>
 
             <div class="card">
-                <h2>Players</h2>
-                <div class="table-wrap"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Age</th>
-                                <th>Division</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="playersBody"></tbody>
-                    </table>
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Age</th>
+                            <th>Division</th>
+                            <th>Attendance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playersBody"></tbody>
+                </table>
             </div>
         </div>
 
-        <div id="attendanceTab" class="tab-content">
-            <div class="card">
-                <h2>Attendance</h2>
-                <button class="admin-only" onclick="createAttendance()">Create Today</button>
-                <div class="table-wrap"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceBody"></tbody>
-                    </table>
+        <div id="attendanceTab" class="tab-content card">
+            <h3>Attendance</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Last 5 Sessions</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceBody"></tbody>
+            </table>
+        </div>
+
+        <div id="paymentsTab" class="tab-content card">
+            <h3>Payments</h3>
+            <div id="paymentSummary" class="muted"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentsBody"></tbody>
+            </table>
+        </div>
+
+        <div id="statsTab" class="tab-content card">
+            <h3>Stats</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Attendance %</th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+
+        <div id="recordsTab" class="tab-content">
+            <div class="card admin-only">
+                <h3>Add Match Record</h3>
+                <div class="form-grid">
+                    <select id="recordPlayer"></select>
+                    <input id="recordDate" type="date" />
+                    <input id="recordOpponent" placeholder="Opponent" />
+                    <input id="recordGoals" type="number" min="0" placeholder="Goals" />
+                    <input id="recordTackles" type="number" min="0" placeholder="Tackles" />
+                    <select id="recordRole">
+                        <option value="">Role</option>
+                        <option value="goalkeeper">Goalkeeper</option>
+                        <option value="defender">Defender</option>
+                        <option value="midfielder">Midfielder</option>
+                        <option value="forward">Forward</option>
+                    </select>
                 </div>
+                <label class="checkbox-row">
+                    <input id="recordCleanSheet" type="checkbox" />
+                    Clean sheet
+                </label>
+                <textarea id="recordNotes" placeholder="Notes"></textarea>
+                <button onclick="addRecord()">Save Record</button>
+            </div>
+
+            <div class="card">
+                <h3>Player Records</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Position</th>
+                            <th>Goals</th>
+                            <th>Clean Sheets</th>
+                            <th>Tackles</th>
+                            <th>Matches</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody"></tbody>
+                </table>
             </div>
         </div>
 
-        <div id="paymentsTab" class="tab-content">
-            <div class="card">
-                <h2>Payments</h2>
-                <button class="admin-only" onclick="generatePayments()">Generate Monthly Payments</button>
-                <div id="paymentSummary" style="margin-top:12px;font-weight:800;"></div>
-                <div class="table-wrap"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Month</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="paymentsBody"></tbody>
-                    </table>
+        <div id="mediaTab" class="tab-content">
+            <div class="card admin-only">
+                <h3>Add Photo or Video</h3>
+                <div class="form-grid">
+                    <select id="mediaPlayer"></select>
+                    <input id="mediaTitle" placeholder="Title" />
+                    <input id="mediaFile" type="file" accept="image/*,video/*" />
                 </div>
+                <button onclick="uploadMedia()">Upload Media</button>
+            </div>
+
+            <div class="card">
+                <h3>Photos and Videos</h3>
+                <div id="mediaGrid" class="media-grid"></div>
             </div>
         </div>
 
-        <div id="statsTab" class="tab-content">
-            <div class="card">
-                <h2>Player Stats</h2>
-                <div class="table-wrap"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Goals</th>
-                                <th>Assists</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="statsBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
-    const API_URL = 'https://soccer-manager-61iv.onrender.com/api';
-    
-    let currentRole = null;
-    let players = [];
-    let attendance = [];
-    let payments = [];
-    let stats = [];
-    
-    function canEdit() {
-        return currentRole === 'admin';
+const API_URL = "https://soccer-manager-61iv.onrender.com/api";
+
+let currentRole = localStorage.getItem("role");
+let token = localStorage.getItem("token");
+window.players = [];
+window.playerRecords = [];
+window.playerMedia = [];
+
+function authHeaders() {
+    const headers = {
+        "Content-Type": "application/json"
+    };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
     }
-    
-    async function login() {
-        const role = document.getElementById('roleSelect').value;
-        const password = document.getElementById('adminPassword').value;
-    
-        try {
-            const res = await fetch(`${API_URL}/auth`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role, password })
-            });
-    
-        const data = await res.json();
 
-        if (!data.success) {
-            document.getElementById('loginError').innerText = 'Invalid login';
-            return;
-        }
+    return headers;
+}
 
-        currentRole = data.role;
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('roleText').innerText = canEdit() ? 'Admin mode' : 'View only mode';
-        document.getElementById('readonlyWarning').style.display = canEdit() ? 'none' : 'block';
+function normalizePlayers(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.players)) return data.players;
+    return [];
+}
 
-        document.querySelectorAll('.admin-only').forEach(el => {
-            el.style.display = canEdit() ? '' : 'none';
+function getPlayerId(player) {
+    return player._id || player.id;
+}
+
+function getPlayerName(player) {
+    return player.name || `${player.firstName || player.first_name || ""} ${player.lastName || player.last_name || ""}`.trim();
+}
+
+function absoluteMediaUrl(fileUrl) {
+    if (!fileUrl) return "";
+    if (fileUrl.startsWith("http")) return fileUrl;
+    return API_URL.replace("/api", "") + fileUrl;
+}
+
+function getBlocks(player) {
+    if (!Array.isArray(player.attendance)) {
+        player.attendance = [null, null, null, null, null];
+    }
+
+    while (player.attendance.length < 5) {
+        player.attendance.push(null);
+    }
+
+    return player.attendance.slice(0, 5);
+}
+
+function isPaid(player) {
+    return player.paid === true || player.paymentStatus === "paid" || player.status === "paid";
+}
+
+async function login() {
+    const role = document.getElementById("roleSelect").value;
+    const password = document.getElementById("adminPassword").value;
+    const loginBtn = document.querySelector("#loginOverlay button");
+    const message = document.getElementById("loginError");
+
+    message.textContent = "";
+
+    if (role === "admin" && !password) {
+        message.textContent = "Enter admin password.";
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in...";
+
+    try {
+        const res = await fetch(`${API_URL}/auth`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ role, password })
         });
 
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.success === false) {
+            throw new Error(data.message || "Invalid login details.");
+        }
+
+        token = data.token || "";
+        currentRole = data.role || data.user?.role || role;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", currentRole);
+
+        openApp();
         await loadData();
-    } catch (err) {
-        document.getElementById('loginError').innerText = 'Cannot connect to backend';
-        console.error(err);
+    } catch (error) {
+        message.textContent = error.message || "Login failed.";
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
     }
+}
+
+function openApp() {
+    document.getElementById("loginOverlay").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+
+    document.getElementById("roleText").innerText =
+        currentRole === "admin" ? "Admin Mode" : "Viewer Mode";
+
+    document.querySelectorAll(".admin-only").forEach(el => {
+        el.style.display = currentRole === "admin" ? "block" : "none";
+    });
 }
 
 function logout() {
     currentRole = null;
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('loginOverlay').style.display = 'flex';
+    token = null;
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    location.reload();
 }
 
 async function loadData() {
-    const [playersRes, attendanceRes, paymentsRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/players`),
-        fetch(`${API_URL}/attendance`),
-        fetch(`${API_URL}/payments`),
-        fetch(`${API_URL}/stats`)
-    ]);
+    try {
+        const res = await fetch(`${API_URL}/players`, {
+            headers: authHeaders()
+        });
 
-    players = await playersRes.json();
-    attendance = await attendanceRes.json();
-    payments = await paymentsRes.json();
-    stats = await statsRes.json();
+        const data = await res.json();
+        window.players = normalizePlayers(data);
+        await loadRecords();
+        await loadMedia();
 
-    renderAll();
+        renderPlayers();
+        renderAttendance();
+        renderPayments();
+        renderStats();
+        renderRecordPlayerOptions();
+        renderMediaPlayerOptions();
+        renderRecords();
+        renderMedia();
+        renderDashboard();
+    } catch (error) {
+        alert("Could not load players. Please check the API connection.");
+    }
 }
 
-function renderAll() {
-    renderPlayers();
-    renderAttendance();
-    renderPayments();
-    renderStats();
-    renderDashboard();
+async function loadRecords() {
+    try {
+        const res = await fetch(`${API_URL}/player-records`, {
+            headers: authHeaders()
+        });
+
+        if (!res.ok) {
+            window.playerRecords = [];
+            return;
+        }
+
+        window.playerRecords = await res.json();
+    } catch (error) {
+        window.playerRecords = [];
+    }
 }
 
-function renderDashboard() {
-    const today = new Date().toISOString().slice(0, 10);
+async function loadMedia() {
+    try {
+        const res = await fetch(`${API_URL}/player-media`, {
+            headers: authHeaders()
+        });
 
-    document.getElementById('totalPlayers').innerText = players.length;
-    document.getElementById('presentToday').innerText = attendance.filter(a => {
-        return String(a.attendance_date).slice(0, 10) === today && a.status === 'present';
-    }).length;
-    document.getElementById('paidCount').innerText = payments.filter(p => p.status === 'paid').length;
-}
+        if (!res.ok) {
+            window.playerMedia = [];
+            return;
+        }
 
-function fullName(player) {
-    return `${player.first_name || ''} ${player.last_name || ''}`.trim();
+        window.playerMedia = await res.json();
+    } catch (error) {
+        window.playerMedia = [];
+    }
 }
 
 async function addPlayer() {
-    if (!canEdit()) return;
+    if (currentRole !== "admin") return;
 
-    const body = {
-        first_name: document.getElementById('firstName').value,
-        last_name: document.getElementById('lastName').value,
-        position: document.getElementById('position').value,
-        age: Number(document.getElementById('age').value),
-        division: document.getElementById('division').value
-    };
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const position = document.getElementById("position").value.trim();
+    const age = document.getElementById("age").value;
+    const division = document.getElementById("division").value.trim();
 
-    if (!body.first_name || !body.last_name) {
-        alert('First name and last name are required');
+    if (!firstName || !lastName) {
+        alert("Enter first and last name.");
         return;
     }
 
-    await fetch(`${API_URL}/players`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+    const player = {
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+        position,
+        age: age ? Number(age) : "",
+        division,
+        attendance: [null, null, null, null, null],
+        paid: false
+    };
+
+    const res = await fetch(`${API_URL}/players`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(player)
     });
 
-    document.getElementById('firstName').value = '';
-    document.getElementById('lastName').value = '';
-    document.getElementById('position').value = '';
-    document.getElementById('age').value = '';
-    document.getElementById('division').value = '';
+    if (!res.ok) {
+        alert("Could not add player.");
+        return;
+    }
+
+    document.getElementById("firstName").value = "";
+    document.getElementById("lastName").value = "";
+    document.getElementById("position").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("division").value = "";
+
+    await loadData();
+}
+
+async function toggle(player, index) {
+    if (currentRole !== "admin") return;
+
+    const blocks = getBlocks(player);
+
+    if (!blocks[index]) {
+        blocks[index] = "present";
+    } else if (blocks[index] === "present") {
+        blocks[index] = "absent";
+    } else {
+        blocks[index] = null;
+    }
+
+    const res = await fetch(`${API_URL}/players/${getPlayerId(player)}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ attendance: blocks })
+    });
+
+    if (!res.ok) {
+        alert("Could not update attendance.");
+        return;
+    }
+
+    await loadData();
+}
+
+async function togglePaid(player) {
+    if (currentRole !== "admin") return;
+
+    const paid = !isPaid(player);
+
+    const res = await fetch(`${API_URL}/players/${getPlayerId(player)}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ paid, paymentStatus: paid ? "paid" : "unpaid" })
+    });
+
+    if (!res.ok) {
+        alert("Could not update payment.");
+        return;
+    }
 
     await loadData();
 }
 
 async function deletePlayer(id) {
-    if (!canEdit()) return;
-    if (!confirm('Delete this player?')) return;
+    if (currentRole !== "admin") return;
 
-    await fetch(`${API_URL}/players/${id}`, { method: 'DELETE' });
+    if (!confirm("Delete this player?")) return;
+
+    const res = await fetch(`${API_URL}/players/${id}`, {
+        method: "DELETE",
+        headers: authHeaders()
+    });
+
+    if (!res.ok) {
+        alert("Could not delete player.");
+        return;
+    }
+
     await loadData();
+}
+
+function renderBlocks(player) {
+    const blocks = getBlocks(player);
+
+    return `
+        <div class="att-box">
+            ${blocks.map((block, index) => {
+                const icon = block === "present" ? "✓" : block === "absent" ? "✗" : "";
+                const safePlayer = encodeURIComponent(JSON.stringify(player));
+
+                return `
+                    <div
+                        class="block ${block || ""}"
+                        onclick="toggle(JSON.parse(decodeURIComponent('${safePlayer}')), ${index})"
+                        title="Click to change attendance"
+                    >${icon}</div>
+                `;
+            }).join("")}
+        </div>
+    `;
 }
 
 function renderPlayers() {
-    const tbody = document.getElementById('playersBody');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById("playersBody");
 
-    players.forEach(player => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${fullName(player)}</td>
-                <td>${player.position || ''}</td>
-                <td>${player.age || ''}</td>
-                <td>${player.division || ''}</td>
-                <td>
-                    ${canEdit() ? `
-                        <button onclick="markAttendance(${player.id}, 'present')">Present</button>
-                        <button class="danger" onclick="markAttendance(${player.id}, 'absent')">Absent</button>
-                        <button class="danger" onclick="deletePlayer(${player.id})">Delete</button>
-                    ` : 'View only'}
-                </td>
-            </tr>
-        `;
-    });
-}
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No players found.</td></tr>`;
+        return;
+    }
 
-async function createAttendance() {
-    if (!canEdit()) return;
-
-    await fetch(`${API_URL}/attendance/auto`, { method: 'POST' });
-    await loadData();
-}
-
-async function markAttendance(playerId, status) {
-    if (!canEdit()) return;
-
-    await fetch(`${API_URL}/attendance/mark`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_id: playerId, status })
-    });
-
-    await loadData();
+    tbody.innerHTML = window.players.map(player => `
+        <tr>
+            <td>${player.name || `${player.firstName || ""} ${player.lastName || ""}`.trim()}</td>
+            <td>${player.position || ""}</td>
+            <td>${player.age || ""}</td>
+            <td>${player.division || ""}</td>
+            <td>${renderBlocks(player)}</td>
+            <td>
+                ${
+                    currentRole === "admin"
+                        ? `<button class="danger" onclick="deletePlayer('${getPlayerId(player)}')">Delete</button>`
+                        : ""
+                }
+            </td>
+        </tr>
+    `).join("");
 }
 
 function renderAttendance() {
-    const tbody = document.getElementById('attendanceBody');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById("attendanceBody");
 
-    attendance.forEach(row => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${row.first_name} ${row.last_name}</td>
-                <td>${String(row.attendance_date).slice(0, 10)}</td>
-                <td>${row.status}</td>
-            </tr>
-        `;
-    });
-}
-
-async function generatePayments() {
-    if (!canEdit()) return;
-
-    await fetch(`${API_URL}/payments/generate`, { method: 'POST' });
-    await loadData();
-}
-
-async function markPaid(playerId) {
-    if (!canEdit()) return;
-
-    await fetch(`${API_URL}/payments/pay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_id: playerId })
-    });
-
-    await loadData();
+    tbody.innerHTML = window.players.map(player => `
+        <tr>
+            <td>${player.name || ""}</td>
+            <td>${renderBlocks(player)}</td>
+        </tr>
+    `).join("");
 }
 
 function renderPayments() {
-    const tbody = document.getElementById('paymentsBody');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById("paymentsBody");
+    const paidCount = window.players.filter(isPaid).length;
 
-    let collected = 0;
-    let outstanding = 0;
+    document.getElementById("paymentSummary").textContent =
+        `${paidCount} of ${window.players.length} players paid.`;
 
-    payments.forEach(payment => {
-        if (payment.status === 'paid') collected += Number(payment.amount);
-        else outstanding += Number(payment.amount);
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${payment.first_name} ${payment.last_name}</td>
-                <td>R${payment.amount}</td>
-                <td>${payment.status}</td>
-                <td>${payment.payment_month || ''}</td>
-                <td>
-                    ${payment.status !== 'paid' && canEdit()
-                        ? `<button onclick="markPaid(${payment.player_id})">Mark Paid</button>`
-                        : 'Done'}
-                </td>
-            </tr>
-        `;
-    });
-
-    document.getElementById('paymentSummary').innerText =
-        `Collected: R${collected} | Outstanding: R${outstanding}`;
-}
-
-async function updateStats(playerId) {
-    if (!canEdit()) return;
-
-    const goals = Number(document.getElementById(`goals-${playerId}`).value);
-    const assists = Number(document.getElementById(`assists-${playerId}`).value);
-
-    await fetch(`${API_URL}/stats/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_id: playerId, goals, assists })
-    });
-
-    await loadData();
+    tbody.innerHTML = window.players.map(player => `
+        <tr>
+            <td>${player.name || ""}</td>
+            <td>${isPaid(player) ? "Paid" : "Unpaid"}</td>
+            <td>
+                ${
+                    currentRole === "admin"
+                        ? `<button onclick='togglePaid(${JSON.stringify(player)})'>${isPaid(player) ? "Mark Unpaid" : "Mark Paid"}</button>`
+                        : ""
+                }
+            </td>
+        </tr>
+    `).join("");
 }
 
 function renderStats() {
-    const tbody = document.getElementById('statsBody');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById("statsBody");
 
-    players.forEach(player => {
-        const playerStats = stats.find(s => s.player_id === player.id) || {
-            goals: 0,
-            assists: 0
-        };
+    tbody.innerHTML = window.players.map(player => {
+        const blocks = getBlocks(player);
+        const present = blocks.filter(block => block === "present").length;
+        const absent = blocks.filter(block => block === "absent").length;
+        const marked = present + absent;
+        const percentage = marked ? Math.round((present / marked) * 100) : 0;
 
-        tbody.innerHTML += `
+        return `
             <tr>
-                <td>${fullName(player)}</td>
-                <td><input id="goals-${player.id}" type="number" value="${playerStats.goals || 0}" ${canEdit() ? '' : 'disabled'}></td>
-                <td><input id="assists-${player.id}" type="number" value="${playerStats.assists || 0}" ${canEdit() ? '' : 'disabled'}></td>
-                <td>${canEdit() ? `<button onclick="updateStats(${player.id})">Save</button>` : 'View only'}</td>
+                <td>${player.name || ""}</td>
+                <td>${present}</td>
+                <td>${absent}</td>
+                <td>${percentage}%</td>
             </tr>
+        `;
+    }).join("");
+}
+
+function renderRecordPlayerOptions() {
+    const selects = [
+        document.getElementById("recordPlayer"),
+        document.getElementById("mediaPlayer")
+    ];
+
+    selects.forEach(select => {
+        if (!select) return;
+
+        select.innerHTML = `
+            <option value="">Select player</option>
+            ${window.players.map(player => `
+                <option value="${getPlayerId(player)}">${getPlayerName(player)}</option>
+            `).join("")}
         `;
     });
 }
 
-function showTab(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+function renderMediaPlayerOptions() {
+    renderRecordPlayerOptions();
+}
 
-    event.target.classList.add('active');
-    document.getElementById(`${tabName}Tab`).classList.add('active');
+function renderRecords() {
+    const tbody = document.getElementById("recordsBody");
+
+    if (!tbody) return;
+
+    if (!window.playerRecords.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No records yet.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = window.playerRecords.map(record => `
+        <tr>
+            <td>${`${record.first_name || ""} ${record.last_name || ""}`.trim()}</td>
+            <td>${record.position || ""}</td>
+            <td>${record.goals || 0}</td>
+            <td>${record.clean_sheets || 0}</td>
+            <td>${record.tackles || 0}</td>
+            <td>${record.matches_recorded || 0}</td>
+        </tr>
+    `).join("");
+}
+
+async function addRecord() {
+    if (currentRole !== "admin") return;
+
+    const playerId = document.getElementById("recordPlayer").value;
+
+    if (!playerId) {
+        alert("Select a player.");
+        return;
+    }
+
+    const record = {
+        player_id: playerId,
+        match_date: document.getElementById("recordDate").value,
+        opponent: document.getElementById("recordOpponent").value.trim(),
+        goals: Number(document.getElementById("recordGoals").value) || 0,
+        clean_sheet: document.getElementById("recordCleanSheet").checked,
+        tackles: Number(document.getElementById("recordTackles").value) || 0,
+        role: document.getElementById("recordRole").value,
+        notes: document.getElementById("recordNotes").value.trim()
+    };
+
+    const res = await fetch(`${API_URL}/player-records`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(record)
+    });
+
+    if (!res.ok) {
+        alert("Could not save record. Run the database migration first if this is your first deployment.");
+        return;
+    }
+
+    document.getElementById("recordGoals").value = "";
+    document.getElementById("recordTackles").value = "";
+    document.getElementById("recordCleanSheet").checked = false;
+    document.getElementById("recordNotes").value = "";
+
+    await loadRecords();
+    renderRecords();
+}
+
+function renderMedia() {
+    const grid = document.getElementById("mediaGrid");
+
+    if (!grid) return;
+
+    if (!window.playerMedia.length) {
+        grid.innerHTML = `<p>No photos or videos yet.</p>`;
+        return;
+    }
+
+    grid.innerHTML = window.playerMedia.map(item => {
+        const src = absoluteMediaUrl(item.file_url);
+        const playerName = `${item.first_name || ""} ${item.last_name || ""}`.trim();
+        const preview = item.media_type === "video"
+            ? `<video controls src="${src}"></video>`
+            : `<img src="${src}" alt="${item.title || "Player media"}">`;
+
+        return `
+            <div class="media-item">
+                ${preview}
+                <strong>${item.title || "Untitled"}</strong>
+                <p class="muted">${playerName || "Team media"}</p>
+            </div>
+        `;
+    }).join("");
+}
+
+async function uploadMedia() {
+    if (currentRole !== "admin") return;
+
+    const fileInput = document.getElementById("mediaFile");
+
+    if (!fileInput.files.length) {
+        alert("Choose a photo or video.");
+        return;
+    }
+
+    const form = new FormData();
+    form.append("file", fileInput.files[0]);
+    form.append("player_id", document.getElementById("mediaPlayer").value);
+    form.append("title", document.getElementById("mediaTitle").value.trim());
+    form.append("media_type", fileInput.files[0].type.startsWith("video/") ? "video" : "photo");
+
+    const res = await fetch(`${API_URL}/player-media`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form
+    });
+
+    if (!res.ok) {
+        alert("Could not upload media. Run the database migration first if this is your first deployment.");
+        return;
+    }
+
+    fileInput.value = "";
+    document.getElementById("mediaTitle").value = "";
+
+    await loadMedia();
+    renderMedia();
+}
+
+function renderDashboard() {
+    const presentToday = window.players.filter(player => getBlocks(player)[0] === "present").length;
+    const paidCount = window.players.filter(isPaid).length;
+
+    document.getElementById("totalPlayers").innerText = window.players.length;
+    document.getElementById("presentToday").innerText = presentToday;
+    document.getElementById("paidCount").innerText = paidCount;
+}
+
+function showTab(tab) {
+    document.querySelectorAll(".tab-content").forEach(content => {
+        content.classList.remove("active");
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(button => {
+        button.classList.remove("active");
+    });
+
+    document.getElementById(`${tab}Tab`).classList.add("active");
+
+    const clickedButton = Array.from(document.querySelectorAll(".tab-btn"))
+        .find(button => button.textContent.toLowerCase() === tab);
+
+    if (clickedButton) {
+        clickedButton.classList.add("active");
+    }
+}
+
+if (token && currentRole) {
+    openApp();
+    loadData();
 }
 </script>
+
 </body>
 </html>
