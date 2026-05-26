@@ -71,6 +71,149 @@ body{
     margin-bottom:12px;
 }
 
+/* Pitch styles */
+.pitch {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    background: linear-gradient(145deg, #2d7a3e, #1a5c2a);
+    border-radius: 12px;
+    border: 3px solid white;
+    overflow-x: auto;
+}
+
+.pitch-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.center-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: rgba(255,255,255,0.5);
+}
+
+.penalty-box {
+    position: absolute;
+    width: 160px;
+    height: 200px;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+
+.penalty-box-left {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: none;
+}
+
+.penalty-box-right {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right: none;
+}
+
+/* Player cards for lineup */
+.player-card {
+    position: absolute;
+    background: linear-gradient(135deg, #1a5f7a, #0d3b4f);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 30px;
+    cursor: grab;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.1s ease;
+    z-index: 10;
+    min-width: 80px;
+    border: 1px solid rgba(255,215,0,0.5);
+}
+
+.player-card:active {
+    cursor: grabbing;
+}
+
+.player-card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.player-card:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #227a9e, #12526b);
+}
+
+.player-role {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+/* Players pool (bench) */
+.players-pool {
+    background: #2c2c2c;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.players-pool h4 {
+    margin-bottom: 12px;
+    color: #ffd700;
+}
+
+.pool-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 80px;
+}
+
+.pool-player {
+    background: #444;
+    padding: 8px 15px;
+    border-radius: 25px;
+    cursor: grab;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.pool-player:active {
+    cursor: grabbing;
+}
+
+.pool-player:hover {
+    background: #00c853;
+    transform: scale(1.02);
+}
+
+.empty-pool-msg {
+    color: #888;
+    padding: 10px;
+    font-style: italic;
+}
+
 /* QUICK ACTIONS */
 .form-row{
     display:flex;

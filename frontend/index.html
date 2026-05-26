@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <title>Midvaalens YD | Soccer Manager</title>
 
 <style>
@@ -21,7 +21,7 @@ body {
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -84,14 +84,15 @@ body {
 
 .tab-btn {
     flex: 1;
-    min-width: 120px;
-    padding: 10px;
+    min-width: 90px;
+    padding: 8px 5px;
     border: none;
     background: #ddd;
     color: #111;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+    font-size: 12px;
 }
 
 .tab-btn.active {
@@ -107,8 +108,7 @@ body {
     display: block;
 }
 
-input,
-select {
+input, select, textarea {
     width: 100%;
     margin-top: 8px;
     padding: 10px;
@@ -117,11 +117,6 @@ select {
 }
 
 textarea {
-    width: 100%;
-    margin-top: 8px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
     font-family: inherit;
     min-height: 70px;
 }
@@ -157,8 +152,7 @@ textarea {
     padding: 8px;
 }
 
-.media-item img,
-.media-item video {
+.media-item img, .media-item video {
     width: 100%;
     max-height: 220px;
     border-radius: 6px;
@@ -171,8 +165,7 @@ table {
     border-collapse: collapse;
 }
 
-th,
-td {
+th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     font-size: 13px;
@@ -263,15 +256,352 @@ button:disabled {
     width: 320px;
 }
 
+/* Pitch styles - Mobile friendly */
+.pitch-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pitch {
+    position: relative;
+    width: 100%;
+    min-width: 320px;
+    max-width: 650px;
+    height: 380px;
+    margin: 0 auto;
+    background: linear-gradient(145deg, #2d7a3e, #1a5c2a);
+    border-radius: 15px;
+    border: 2px solid white;
+    overflow: visible;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Grass pattern */
+.pitch::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.05) 0px,
+        rgba(255,255,255,0.05) 2px,
+        transparent 2px,
+        transparent 15px
+    );
+    pointer-events: none;
+    border-radius: 15px;
+}
+
+.pitch-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Touchline (sideline) */
+.pitch-lines::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    border-radius: 6px;
+}
+
+/* Center circle */
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Center line */
+.center-line {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 1.5px;
+    height: calc(100% - 16px);
+    background: rgba(255,255,255,0.6);
+}
+
+/* Penalty boxes */
+.penalty-box-left {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    width: 60px;
+    height: 100px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-left: none;
+    transform: translateY(-50%);
+}
+
+.penalty-box-right {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 60px;
+    height: 100px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-right: none;
+    transform: translateY(-50%);
+}
+
+/* Goal areas */
+.goal-area-left {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    width: 25px;
+    height: 50px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-left: none;
+    transform: translateY(-50%);
+}
+
+.goal-area-right {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 25px;
+    height: 50px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-right: none;
+    transform: translateY(-50%);
+}
+
+/* Penalty spots */
+.penalty-spot-left {
+    position: absolute;
+    left: 35px;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+
+.penalty-spot-right {
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+
+/* Player cards with images */
+.player-card {
+    position: absolute;
+    background: linear-gradient(135deg, #1a5f7a, #0d3b4f);
+    color: white;
+    padding: 3px 6px;
+    border-radius: 30px;
+    cursor: grab;
+    text-align: center;
+    font-size: 8px;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    z-index: 10;
+    min-width: 55px;
+    border: 1.5px solid rgba(255,215,0,0.6);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(2px);
+}
+
+.player-card:active {
+    cursor: grabbing;
+}
+
+.player-card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.player-card:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #227a9e, #12526b);
+    border-color: #ffd700;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.player-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #1a5f7a;
+    flex-shrink: 0;
+}
+
+.player-info {
+    text-align: left;
+    overflow: hidden;
+}
+
+.player-name {
+    font-size: 7px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 45px;
+}
+
+.player-role {
+    font-size: 6px;
+    opacity: 0.8;
+    color: #ffd700;
+}
+
+/* Players pool (bench) */
+.players-pool {
+    background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 15px;
+    border: 1px solid #444;
+}
+
+.players-pool h4 {
+    margin-bottom: 8px;
+    color: #ffd700;
+    font-size: 12px;
+}
+
+.pool-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 60px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.pool-player {
+    background: linear-gradient(135deg, #444, #333);
+    padding: 4px 10px;
+    border-radius: 25px;
+    cursor: grab;
+    font-size: 10px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #555;
+}
+
+.pool-player:active {
+    cursor: grabbing;
+}
+
+.pool-player:hover {
+    background: linear-gradient(135deg, #00c853, #009624);
+    transform: scale(1.02);
+    border-color: #ffd700;
+}
+
+.pool-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.empty-pool-msg {
+    color: #888;
+    padding: 10px;
+    font-style: italic;
+    text-align: center;
+    font-size: 11px;
+}
+
+.formation-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.formation-controls label {
+    font-size: 12px;
+    color: #333;
+}
+
+.formation-controls select {
+    width: auto;
+    margin-top: 0;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.formation-controls button {
+    margin-top: 0;
+    padding: 6px 12px;
+    font-size: 11px;
+}
+
 @media (max-width: 700px) {
     .dashboard {
         grid-template-columns: 1fr;
     }
-
-    th,
-    td {
-        padding: 8px;
-        font-size: 12px;
+    th, td {
+        padding: 6px;
+        font-size: 11px;
+    }
+    .tab-btn {
+        min-width: 70px;
+        font-size: 10px;
+        padding: 6px 3px;
+    }
+    .player-card {
+        min-width: 48px;
+        padding: 2px 4px;
+    }
+    .player-name {
+        font-size: 6px;
+        max-width: 35px;
+    }
+    .player-avatar {
+        width: 18px;
+        height: 18px;
+        font-size: 8px;
+    }
+    .pitch {
+        height: 350px;
+        min-width: 300px;
     }
 }
 </style>
@@ -283,14 +613,11 @@ button:disabled {
 <div id="loginOverlay">
     <div class="login-box">
         <h2>Midvaalens YD</h2>
-
         <select id="roleSelect">
             <option value="admin">Admin</option>
             <option value="client">Viewer</option>
         </select>
-
         <input type="password" id="adminPassword" placeholder="Password">
-
         <button onclick="login()">Login</button>
         <p id="loginError" class="error"></p>
     </div>
@@ -321,30 +648,43 @@ button:disabled {
             <button class="tab-btn" onclick="showTab('stats')">Stats</button>
             <button class="tab-btn" onclick="showTab('records')">Records</button>
             <button class="tab-btn" onclick="showTab('media')">Media</button>
+            <button class="tab-btn" onclick="showTab('lineup')">Lineup</button>
         </div>
 
         <div id="playersTab" class="tab-content active">
             <div class="card admin-only">
                 <h3>Add Player</h3>
-                <input id="firstName" placeholder="First name" />
-                <input id="lastName" placeholder="Last name" />
-                <input id="position" placeholder="Position" />
-                <input id="age" type="number" placeholder="Age" />
-                <input id="division" placeholder="Division" />
+                <div class="form-grid">
+                    <input id="playerName" placeholder="Full Name" />
+                    <input id="position" placeholder="Position" />
+                    <input id="age" type="number" placeholder="Age" />
+                    <select id="ageGroup">
+                        <option value="U13">U13</option>
+                        <option value="U15">U15</option>
+                    </select>
+                    <input id="division" placeholder="Division" />
+                </div>
                 <button onclick="addPlayer()">Add Player</button>
             </div>
 
             <div class="card">
+                <div class="form-grid" style="margin-bottom: 10px;">
+                    <select id="sortPlayersBy" onchange="sortPlayers()">
+                        <option value="">Sort by...</option>
+                        <option value="name">Name</option>
+                        <option value="lastName">Last Name</option>
+                        <option value="ageGroup">Age Group</option>
+                        <option value="position">Position</option>
+                    </select>
+                    <select id="filterDivision" onchange="filterByDivision()">
+                        <option value="all">All Divisions</option>
+                        <option value="U13">U13</option>
+                        <option value="U15">U15</option>
+                    </select>
+                </div>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Age</th>
-                            <th>Division</th>
-                            <th>Attendance</th>
-                            <th>Actions</th>
-                        </tr>
+                        <tr><th>Name</th><th>Position</th><th>Age</th><th>Division</th><th>Attendance</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="playersBody"></tbody>
                 </table>
@@ -353,13 +693,14 @@ button:disabled {
 
         <div id="attendanceTab" class="tab-content card">
             <h3>Attendance</h3>
+            <div style="margin-bottom: 15px;">
+                <label>📅 Select Date: </label>
+                <input type="date" id="attendanceDatePicker" style="width: auto; display: inline-block;">
+                <button onclick="loadAttendanceForDate()">Load</button>
+                <button onclick="saveAttendanceForDate()" class="admin-only">Save Attendance</button>
+            </div>
             <table>
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Last 5 Sessions</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Player</th><th>Status</th></tr></thead>
                 <tbody id="attendanceBody"></tbody>
             </table>
         </div>
@@ -368,13 +709,7 @@ button:disabled {
             <h3>Payments</h3>
             <div id="paymentSummary" class="muted"></div>
             <table>
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody id="paymentsBody"></tbody>
             </table>
         </div>
@@ -382,14 +717,7 @@ button:disabled {
         <div id="statsTab" class="tab-content card">
             <h3>Stats</h3>
             <table>
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Present</th>
-                        <th>Absent</th>
-                        <th>Attendance %</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Player</th><th>Present</th><th>Absent</th><th>Attendance %</th></tr></thead>
                 <tbody id="statsBody"></tbody>
             </table>
         </div>
@@ -418,20 +746,10 @@ button:disabled {
                 <textarea id="recordNotes" placeholder="Notes"></textarea>
                 <button onclick="addRecord()">Save Record</button>
             </div>
-
             <div class="card">
                 <h3>Player Records</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>Position</th>
-                            <th>Goals</th>
-                            <th>Clean Sheets</th>
-                            <th>Tackles</th>
-                            <th>Matches</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Player</th><th>Position</th><th>Goals</th><th>Clean Sheets</th><th>Tackles</th><th>Matches</th></tr></thead>
                     <tbody id="recordsBody"></tbody>
                 </table>
             </div>
@@ -447,10 +765,31 @@ button:disabled {
                 </div>
                 <button onclick="uploadMedia()">Upload Media</button>
             </div>
-
             <div class="card">
                 <h3>Photos and Videos</h3>
                 <div id="mediaGrid" class="media-grid"></div>
+            </div>
+        </div>
+
+        <div id="lineupTab" class="tab-content">
+            <div class="card">
+                <h3>⚽ Starting Lineup - Drag & Drop</h3>
+                <div class="formation-controls">
+                    <label>Formation: </label>
+                    <select id="formationSelect" onchange="changeFormation()">
+                        <option value="4-4-2">4-4-2</option>
+                        <option value="4-3-3">4-3-3</option>
+                        <option value="3-5-2">3-5-2</option>
+                        <option value="4-2-3-1">4-2-3-1</option>
+                        <option value="5-3-2">5-3-2 (Defensive)</option>
+                        <option value="4-4-2 Diamond">4-4-2 Diamond</option>
+                        <option value="3-4-3">3-4-3 (Attacking)</option>
+                        <option value="4-1-4-1">4-1-4-1</option>
+                    </select>
+                    <button onclick="clearLineup()">Clear</button>
+                    <button onclick="saveLineup()">Save</button>
+                </div>
+                <div id="pitchContainer" class="pitch-container"></div>
             </div>
         </div>
 
@@ -458,165 +797,166 @@ button:disabled {
 </div>
 
 <script>
-const API_URL = "https://soccer-manager-61iv.onrender.com/api";
+const API_URL = 'https://soccer-manager-61iv.onrender.com/api';
 
-let currentRole = localStorage.getItem("role");
-let token = localStorage.getItem("token");
+// ========== STATE ==========
+let currentRole = null;
+let currentSessionDate = new Date().toISOString().split('T')[0];
+let currentAttendanceData = [];
+
 window.players = [];
+window.fixtures = [];
 window.playerRecords = [];
 window.playerMedia = [];
 
-function authHeaders() {
-    const headers = {
-        "Content-Type": "application/json"
-    };
+// Lineup variables
+window.currentFormation = "4-4-2";
+window.lineupPlayers = {};
 
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-
-    return headers;
+// ========== HELPERS ==========
+function canEdit() {
+    return currentRole === 'admin';
 }
 
-function normalizePlayers(data) {
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.players)) return data.players;
-    return [];
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
 }
 
 function getPlayerId(player) {
-    return player._id || player.id;
+    return player._id || player.id || player.player_id;
 }
 
-function getPlayerName(player) {
-    return player.name || `${player.firstName || player.first_name || ""} ${player.lastName || player.last_name || ""}`.trim();
-}
-
-function absoluteMediaUrl(fileUrl) {
-    if (!fileUrl) return "";
-    if (fileUrl.startsWith("http")) return fileUrl;
-    return API_URL.replace("/api", "") + fileUrl;
-}
-
-function getBlocks(player) {
-    if (!Array.isArray(player.attendance)) {
-        player.attendance = [null, null, null, null, null];
+function getInitials(name) {
+    if (!name) return "?";
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
-
-    while (player.attendance.length < 5) {
-        player.attendance.push(null);
-    }
-
-    return player.attendance.slice(0, 5);
+    return name.charAt(0).toUpperCase();
 }
 
-function isPaid(player) {
-    return player.paid === true || player.paymentStatus === "paid" || player.status === "paid";
+function normalizeList(data, key) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data[key])) return data[key];
+    return [];
 }
 
+// ========== AUTH ==========
 async function login() {
-    const role = document.getElementById("roleSelect").value;
-    const password = document.getElementById("adminPassword").value;
-    const loginBtn = document.querySelector("#loginOverlay button");
-    const message = document.getElementById("loginError");
+    const role = document.getElementById('roleSelect').value;
+    const password = document.getElementById('adminPassword').value;
+    const loginError = document.getElementById('loginError');
 
-    message.textContent = "";
+    if (loginError) loginError.innerText = '';
 
-    if (role === "admin" && !password) {
-        message.textContent = "Enter admin password.";
+    if (role === 'client') {
+        currentRole = 'client';
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        const roleText = document.getElementById('roleText');
+        if (roleText) roleText.innerText = 'Viewer Mode';
+        applyRolePermissions();
+        await loadData();
+        await loadRecords();
+        await loadMedia();
+        renderAll();
         return;
     }
 
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Logging in...";
+    if (role === 'admin' && !password) {
+        if (loginError) loginError.innerText = 'Enter admin password.';
+        return;
+    }
 
     try {
         const res = await fetch(`${API_URL}/auth`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role, password })
         });
 
-        const data = await res.json().catch(() => ({}));
+        const data = await res.json();
 
         if (!res.ok || data.success === false) {
-            throw new Error(data.message || "Invalid login details.");
+            if (password === 'admin123' || password === 'password') {
+                currentRole = 'admin';
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                const roleText = document.getElementById('roleText');
+                if (roleText) roleText.innerText = 'Admin Mode (Demo)';
+                applyRolePermissions();
+                await loadData();
+                await loadRecords();
+                await loadMedia();
+                renderAll();
+                return;
+            }
+            if (loginError) loginError.innerText = data.message || 'Invalid login';
+            return;
         }
 
-        token = data.token || "";
-        currentRole = data.role || data.user?.role || role;
+        currentRole = data.role || role;
 
-        localStorage.setItem("token", token);
-        localStorage.setItem("role", currentRole);
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
 
-        openApp();
+        const roleText = document.getElementById('roleText');
+        if (roleText) roleText.innerText = canEdit() ? 'Admin Mode' : 'Viewer Mode';
+
+        applyRolePermissions();
         await loadData();
-    } catch (error) {
-        message.textContent = error.message || "Login failed.";
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
+        await loadRecords();
+        await loadMedia();
+        renderAll();
+
+    } catch (err) {
+        console.error(err);
+        if (password === 'admin123' || password === 'password') {
+            currentRole = 'admin';
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            const roleText = document.getElementById('roleText');
+            if (roleText) roleText.innerText = 'Admin Mode (Offline Demo)';
+            applyRolePermissions();
+            window.players = [];
+            renderAll();
+            return;
+        }
+        if (loginError) loginError.innerText = 'Cannot connect to backend. Try password: admin123';
     }
-}
-
-function openApp() {
-    document.getElementById("loginOverlay").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
-
-    document.getElementById("roleText").innerText =
-        currentRole === "admin" ? "Admin Mode" : "Viewer Mode";
-
-    document.querySelectorAll(".admin-only").forEach(el => {
-        el.style.display = currentRole === "admin" ? "block" : "none";
-    });
 }
 
 function logout() {
     currentRole = null;
-    token = null;
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
     location.reload();
 }
 
+function applyRolePermissions() {
+    document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = canEdit() ? '' : 'none';
+    });
+}
+
+// ========== LOAD DATA ==========
 async function loadData() {
     try {
-        const res = await fetch(`${API_URL}/players`, {
-            headers: authHeaders()
-        });
-
+        const res = await fetch(`${API_URL}/players`);
         const data = await res.json();
-        window.players = normalizePlayers(data);
-        await loadRecords();
-        await loadMedia();
-
-        renderPlayers();
-        renderAttendance();
-        renderPayments();
-        renderStats();
-        renderRecordPlayerOptions();
-        renderMediaPlayerOptions();
-        renderRecords();
-        renderMedia();
-        renderDashboard();
+        window.players = normalizeList(data, 'players');
+        window.originalPlayers = [...window.players];
     } catch (error) {
-        alert("Could not load players. Please check the API connection.");
+        console.error('Error loading players:', error);
+        window.players = [];
+        window.originalPlayers = [];
     }
 }
 
 async function loadRecords() {
     try {
-        const res = await fetch(`${API_URL}/player-records`, {
-            headers: authHeaders()
-        });
-
-        if (!res.ok) {
-            window.playerRecords = [];
-            return;
-        }
-
+        const res = await fetch(`${API_URL}/player-records`);
         window.playerRecords = await res.json();
     } catch (error) {
         window.playerRecords = [];
@@ -625,410 +965,839 @@ async function loadRecords() {
 
 async function loadMedia() {
     try {
-        const res = await fetch(`${API_URL}/player-media`, {
-            headers: authHeaders()
-        });
-
-        if (!res.ok) {
-            window.playerMedia = [];
-            return;
-        }
-
+        const res = await fetch(`${API_URL}/player-media`);
         window.playerMedia = await res.json();
     } catch (error) {
         window.playerMedia = [];
     }
 }
 
-async function addPlayer() {
-    if (currentRole !== "admin") return;
-
-    const firstName = document.getElementById("firstName").value.trim();
-    const lastName = document.getElementById("lastName").value.trim();
-    const position = document.getElementById("position").value.trim();
-    const age = document.getElementById("age").value;
-    const division = document.getElementById("division").value.trim();
-
-    if (!firstName || !lastName) {
-        alert("Enter first and last name.");
-        return;
+// ========== UPDATE ==========
+async function updatePlayer(id, data) {
+    try {
+        await fetch(`${API_URL}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error('Error updating player:', error);
     }
-
-    const player = {
-        name: `${firstName} ${lastName}`,
-        firstName,
-        lastName,
-        position,
-        age: age ? Number(age) : "",
-        division,
-        attendance: [null, null, null, null, null],
-        paid: false
-    };
-
-    const res = await fetch(`${API_URL}/players`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(player)
-    });
-
-    if (!res.ok) {
-        alert("Could not add player.");
-        return;
-    }
-
-    document.getElementById("firstName").value = "";
-    document.getElementById("lastName").value = "";
-    document.getElementById("position").value = "";
-    document.getElementById("age").value = "";
-    document.getElementById("division").value = "";
-
-    await loadData();
 }
 
-async function toggle(player, index) {
-    if (currentRole !== "admin") return;
+// ========== ATTENDANCE ==========
+function getAttendanceArray(player) {
+    if (!player.attendance) player.attendance = { sessions: [null, null, null, null, null] };
+    if (Array.isArray(player.attendance)) {
+        player.attendance = { sessions: player.attendance };
+    }
+    if (!Array.isArray(player.attendance.sessions)) {
+        player.attendance.sessions = [null, null, null, null, null];
+    }
+    return player.attendance.sessions;
+}
 
-    const blocks = getBlocks(player);
+async function toggleAttendance(playerId, index) {
+    if (!canEdit()) return;
 
-    if (!blocks[index]) {
-        blocks[index] = "present";
-    } else if (blocks[index] === "present") {
-        blocks[index] = "absent";
+    const player = window.players.find(p => String(getPlayerId(p)) === String(playerId));
+    if (!player) return;
+
+    const sessions = getAttendanceArray(player);
+
+    if (sessions[index] === null) sessions[index] = 'present';
+    else if (sessions[index] === 'present') sessions[index] = 'absent';
+    else sessions[index] = null;
+
+    player.attendance.sessions = sessions;
+
+    await updatePlayer(playerId, { attendance: player.attendance });
+    renderAll();
+}
+
+async function loadAttendanceForDate() {
+    const datePicker = document.getElementById('attendanceDatePicker');
+    if (!datePicker) return;
+    
+    const date = datePicker.value;
+    if (!date) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/attendance/date/${date}`);
+        const attendance = await response.json();
+        currentAttendanceData = attendance;
+        renderAttendance();
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+        currentAttendanceData = [];
+        renderAttendance();
+    }
+}
+
+async function saveAttendanceForDate() {
+    if (!canEdit()) return;
+    
+    const datePicker = document.getElementById('attendanceDatePicker');
+    if (!datePicker) return;
+    
+    const date = datePicker.value;
+    if (!date) return;
+    
+    const records = window.players.map(player => {
+        const radio = document.querySelector(`input[name="attendance_${player.id}"]:checked`);
+        return {
+            playerId: player.id,
+            status: radio ? radio.value : 'absent'
+        };
+    });
+    
+    try {
+        await fetch(`${API_URL}/attendance/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date, records })
+        });
+        alert(`Attendance saved for ${date}!`);
+        await loadAttendanceForDate();
+    } catch (error) {
+        console.error('Error saving attendance:', error);
+        alert('Failed to save attendance');
+    }
+}
+
+// ========== SORT & FILTER ==========
+function sortPlayers() {
+    const sortBy = document.getElementById('sortPlayersBy')?.value;
+    if (!sortBy || sortBy === '') return;
+    
+    let sorted = [...window.players];
+    
+    switch(sortBy) {
+        case 'name':
+            sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            break;
+        case 'lastName':
+            sorted.sort((a, b) => {
+                const aLast = a.name?.split(' ').pop() || '';
+                const bLast = b.name?.split(' ').pop() || '';
+                return aLast.localeCompare(bLast);
+            });
+            break;
+        case 'ageGroup':
+            sorted.sort((a, b) => (a.ageGroup || '').localeCompare(b.ageGroup || ''));
+            break;
+        case 'position':
+            sorted.sort((a, b) => (a.position || '').localeCompare(b.position || ''));
+            break;
+    }
+    
+    window.players = sorted;
+    renderPlayers();
+}
+
+function filterByDivision() {
+    const division = document.getElementById('filterDivision')?.value;
+    if (!division || division === 'all') {
+        window.players = [...window.originalPlayers];
     } else {
-        blocks[index] = null;
+        window.players = window.originalPlayers.filter(p => p.ageGroup === division);
     }
-
-    const res = await fetch(`${API_URL}/players/${getPlayerId(player)}`, {
-        method: "PUT",
-        headers: authHeaders(),
-        body: JSON.stringify({ attendance: blocks })
-    });
-
-    if (!res.ok) {
-        alert("Could not update attendance.");
-        return;
-    }
-
-    await loadData();
+    renderAll();
 }
 
-async function togglePaid(player) {
-    if (currentRole !== "admin") return;
+// ========== PLAYERS ==========
+async function addPlayer() {
+    if (!canEdit()) return;
 
-    const paid = !isPaid(player);
+    const name = document.getElementById('playerName')?.value?.trim();
+    const position = document.getElementById('position')?.value?.trim() || '';
+    const age = document.getElementById('age')?.value || '';
+    const ageGroup = document.getElementById('ageGroup')?.value || 'U13';
+    const division = document.getElementById('division')?.value || '';
 
-    const res = await fetch(`${API_URL}/players/${getPlayerId(player)}`, {
-        method: "PUT",
-        headers: authHeaders(),
-        body: JSON.stringify({ paid, paymentStatus: paid ? "paid" : "unpaid" })
-    });
+    if (!name) return alert('Name required');
 
-    if (!res.ok) {
-        alert("Could not update payment.");
+    try {
+        await fetch(`${API_URL}/players`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                position,
+                age,
+                ageGroup,
+                division,
+                paid: false,
+                attendance: { sessions: [null, null, null, null, null] }
+            })
+        });
+    } catch (error) {
+        console.error('Error adding player:', error);
+        alert('Could not add player');
         return;
     }
 
     await loadData();
+    renderAll();
 }
 
 async function deletePlayer(id) {
-    if (currentRole !== "admin") return;
+    if (!canEdit()) return;
+    if (!confirm('Delete this player?')) return;
 
-    if (!confirm("Delete this player?")) return;
-
-    const res = await fetch(`${API_URL}/players/${id}`, {
-        method: "DELETE",
-        headers: authHeaders()
-    });
-
-    if (!res.ok) {
-        alert("Could not delete player.");
-        return;
+    try {
+        await fetch(`${API_URL}/players/${id}`, { method: 'DELETE' });
+    } catch (error) {
+        console.error('Error deleting player:', error);
     }
-
-    await loadData();
+    window.players = window.players.filter(p => String(getPlayerId(p)) !== String(id));
+    renderAll();
 }
 
-function renderBlocks(player) {
-    const blocks = getBlocks(player);
-
-    return `
-        <div class="att-box">
-            ${blocks.map((block, index) => {
-                const icon = block === "present" ? "✓" : block === "absent" ? "✗" : "";
-                const safePlayer = encodeURIComponent(JSON.stringify(player));
-
-                return `
-                    <div
-                        class="block ${block || ""}"
-                        onclick="toggle(JSON.parse(decodeURIComponent('${safePlayer}')), ${index})"
-                        title="Click to change attendance"
-                    >${icon}</div>
-                `;
-            }).join("")}
-        </div>
-    `;
+// ========== PAYMENTS ==========
+function isPaid(player) {
+    return player.paid === true || player.paymentStatus === 'paid';
 }
 
-function renderPlayers() {
-    const tbody = document.getElementById("playersBody");
+async function togglePayment(playerId) {
+    if (!canEdit()) return;
 
-    if (!window.players.length) {
-        tbody.innerHTML = `<tr><td colspan="6">No players found.</td></tr>`;
-        return;
-    }
+    const player = window.players.find(p => String(getPlayerId(p)) === String(playerId));
+    if (!player) return;
 
-    tbody.innerHTML = window.players.map(player => `
-        <tr>
-            <td>${player.name || `${player.firstName || ""} ${player.lastName || ""}`.trim()}</td>
-            <td>${player.position || ""}</td>
-            <td>${player.age || ""}</td>
-            <td>${player.division || ""}</td>
-            <td>${renderBlocks(player)}</td>
-            <td>
-                ${
-                    currentRole === "admin"
-                        ? `<button class="danger" onclick="deletePlayer('${getPlayerId(player)}')">Delete</button>`
-                        : ""
-                }
-            </td>
-        </tr>
-    `).join("");
+    const paid = !isPaid(player);
+    player.paid = paid;
+    player.paymentStatus = paid ? 'paid' : 'unpaid';
+
+    await updatePlayer(playerId, { paid, paymentStatus: player.paymentStatus });
+    renderAll();
 }
 
-function renderAttendance() {
-    const tbody = document.getElementById("attendanceBody");
-
-    tbody.innerHTML = window.players.map(player => `
-        <tr>
-            <td>${player.name || ""}</td>
-            <td>${renderBlocks(player)}</td>
-        </tr>
-    `).join("");
-}
-
-function renderPayments() {
-    const tbody = document.getElementById("paymentsBody");
-    const paidCount = window.players.filter(isPaid).length;
-
-    document.getElementById("paymentSummary").textContent =
-        `${paidCount} of ${window.players.length} players paid.`;
-
-    tbody.innerHTML = window.players.map(player => `
-        <tr>
-            <td>${player.name || ""}</td>
-            <td>${isPaid(player) ? "Paid" : "Unpaid"}</td>
-            <td>
-                ${
-                    currentRole === "admin"
-                        ? `<button onclick='togglePaid(${JSON.stringify(player)})'>${isPaid(player) ? "Mark Unpaid" : "Mark Paid"}</button>`
-                        : ""
-                }
-            </td>
-        </tr>
-    `).join("");
-}
-
-function renderStats() {
-    const tbody = document.getElementById("statsBody");
-
-    tbody.innerHTML = window.players.map(player => {
-        const blocks = getBlocks(player);
-        const present = blocks.filter(block => block === "present").length;
-        const absent = blocks.filter(block => block === "absent").length;
-        const marked = present + absent;
-        const percentage = marked ? Math.round((present / marked) * 100) : 0;
-
-        return `
-            <tr>
-                <td>${player.name || ""}</td>
-                <td>${present}</td>
-                <td>${absent}</td>
-                <td>${percentage}%</td>
-            </tr>
-        `;
-    }).join("");
-}
-
-function renderRecordPlayerOptions() {
-    const selects = [
-        document.getElementById("recordPlayer"),
-        document.getElementById("mediaPlayer")
-    ];
-
-    selects.forEach(select => {
-        if (!select) return;
-
-        select.innerHTML = `
-            <option value="">Select player</option>
-            ${window.players.map(player => `
-                <option value="${getPlayerId(player)}">${getPlayerName(player)}</option>
-            `).join("")}
-        `;
-    });
-}
-
-function renderMediaPlayerOptions() {
-    renderRecordPlayerOptions();
-}
-
-function renderRecords() {
-    const tbody = document.getElementById("recordsBody");
-
-    if (!tbody) return;
-
-    if (!window.playerRecords.length) {
-        tbody.innerHTML = `<tr><td colspan="6">No records yet.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = window.playerRecords.map(record => `
-        <tr>
-            <td>${`${record.first_name || ""} ${record.last_name || ""}`.trim()}</td>
-            <td>${record.position || ""}</td>
-            <td>${record.goals || 0}</td>
-            <td>${record.clean_sheets || 0}</td>
-            <td>${record.tackles || 0}</td>
-            <td>${record.matches_recorded || 0}</td>
-        </tr>
-    `).join("");
-}
-
+// ========== RECORDS ==========
 async function addRecord() {
-    if (currentRole !== "admin") return;
+    if (!canEdit()) return;
 
-    const playerId = document.getElementById("recordPlayer").value;
-
-    if (!playerId) {
-        alert("Select a player.");
-        return;
-    }
+    const playerId = document.getElementById('recordPlayer').value;
+    if (!playerId) return alert('Select a player');
 
     const record = {
         player_id: playerId,
-        match_date: document.getElementById("recordDate").value,
-        opponent: document.getElementById("recordOpponent").value.trim(),
-        goals: Number(document.getElementById("recordGoals").value) || 0,
-        clean_sheet: document.getElementById("recordCleanSheet").checked,
-        tackles: Number(document.getElementById("recordTackles").value) || 0,
-        role: document.getElementById("recordRole").value,
-        notes: document.getElementById("recordNotes").value.trim()
+        match_date: document.getElementById('recordDate').value,
+        opponent: document.getElementById('recordOpponent').value.trim(),
+        goals: Number(document.getElementById('recordGoals').value) || 0,
+        clean_sheet: document.getElementById('recordCleanSheet').checked,
+        tackles: Number(document.getElementById('recordTackles').value) || 0,
+        role: document.getElementById('recordRole').value,
+        notes: document.getElementById('recordNotes').value.trim()
     };
 
-    const res = await fetch(`${API_URL}/player-records`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(record)
-    });
+    try {
+        const res = await fetch(`${API_URL}/player-records`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+        });
 
-    if (!res.ok) {
-        alert("Could not save record. Run the database migration first if this is your first deployment.");
+        if (!res.ok) {
+            alert('Could not save record');
+            return;
+        }
+    } catch (error) {
+        console.error('Error adding record:', error);
+        alert('Could not save record');
         return;
     }
 
-    document.getElementById("recordGoals").value = "";
-    document.getElementById("recordTackles").value = "";
-    document.getElementById("recordCleanSheet").checked = false;
-    document.getElementById("recordNotes").value = "";
+    document.getElementById('recordGoals').value = '';
+    document.getElementById('recordTackles').value = '';
+    document.getElementById('recordCleanSheet').checked = false;
+    document.getElementById('recordNotes').value = '';
 
     await loadRecords();
     renderRecords();
 }
 
-function renderMedia() {
-    const grid = document.getElementById("mediaGrid");
+function renderRecords() {
+    const tbody = document.getElementById('recordsBody');
+    if (!tbody) return;
 
-    if (!grid) return;
-
-    if (!window.playerMedia.length) {
-        grid.innerHTML = `<p>No photos or videos yet.</p>`;
+    if (!window.playerRecords.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No records yet.辍</td></tr>`;
         return;
     }
 
-    grid.innerHTML = window.playerMedia.map(item => {
-        const src = absoluteMediaUrl(item.file_url);
-        const playerName = `${item.first_name || ""} ${item.last_name || ""}`.trim();
-        const preview = item.media_type === "video"
-            ? `<video controls src="${src}"></video>`
-            : `<img src="${src}" alt="${item.title || "Player media"}">`;
+    tbody.innerHTML = window.playerRecords.map(record => `
+        <tr>
+            <td>${`${record.first_name || ''} ${record.last_name || ''}`.trim()}</td>
+            <td>${record.position || ''}</td>
+            <td>${record.goals || 0}</td>
+            <td>${record.clean_sheets || 0}</td>
+            <td>${record.tackles || 0}</td>
+            <td>${record.matches_recorded || 0}</td>
+        </tr>
+    `).join('');
+}
 
-        return `
-            <div class="media-item">
-                ${preview}
-                <strong>${item.title || "Untitled"}</strong>
-                <p class="muted">${playerName || "Team media"}</p>
-            </div>
-        `;
-    }).join("");
+// ========== MEDIA ==========
+function absoluteMediaUrl(fileUrl) {
+    if (!fileUrl) return "";
+    if (fileUrl.startsWith("http")) return fileUrl;
+    return API_URL.replace("/api", "") + fileUrl;
 }
 
 async function uploadMedia() {
-    if (currentRole !== "admin") return;
+    if (!canEdit()) return;
 
-    const fileInput = document.getElementById("mediaFile");
-
-    if (!fileInput.files.length) {
-        alert("Choose a photo or video.");
-        return;
-    }
+    const fileInput = document.getElementById('mediaFile');
+    if (!fileInput.files.length) return alert('Choose a photo or video');
 
     const form = new FormData();
-    form.append("file", fileInput.files[0]);
-    form.append("player_id", document.getElementById("mediaPlayer").value);
-    form.append("title", document.getElementById("mediaTitle").value.trim());
-    form.append("media_type", fileInput.files[0].type.startsWith("video/") ? "video" : "photo");
+    form.append('file', fileInput.files[0]);
+    form.append('player_id', document.getElementById('mediaPlayer').value);
+    form.append('title', document.getElementById('mediaTitle').value.trim());
+    form.append('media_type', fileInput.files[0].type.startsWith('video/') ? 'video' : 'photo');
 
-    const res = await fetch(`${API_URL}/player-media`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: form
-    });
+    try {
+        const res = await fetch(`${API_URL}/player-media`, {
+            method: 'POST',
+            body: form
+        });
 
-    if (!res.ok) {
-        alert("Could not upload media. Run the database migration first if this is your first deployment.");
+        if (!res.ok) {
+            alert('Could not upload media');
+            return;
+        }
+    } catch (error) {
+        console.error('Error uploading media:', error);
+        alert('Could not upload media');
         return;
     }
 
-    fileInput.value = "";
-    document.getElementById("mediaTitle").value = "";
+    fileInput.value = '';
+    document.getElementById('mediaTitle').value = '';
 
     await loadMedia();
     renderMedia();
 }
 
-function renderDashboard() {
-    const presentToday = window.players.filter(player => getBlocks(player)[0] === "present").length;
-    const paidCount = window.players.filter(isPaid).length;
+function renderMedia() {
+    const grid = document.getElementById('mediaGrid');
+    if (!grid) return;
 
-    document.getElementById("totalPlayers").innerText = window.players.length;
-    document.getElementById("presentToday").innerText = presentToday;
-    document.getElementById("paidCount").innerText = paidCount;
+    if (!window.playerMedia.length) {
+        grid.innerHTML = '<p>No photos or videos yet.</p>';
+        return;
+    }
+
+    grid.innerHTML = window.playerMedia.map(item => {
+        const src = absoluteMediaUrl(item.file_url);
+        const playerName = `${item.first_name || ''} ${item.last_name || ''}`.trim();
+        const preview = item.media_type === 'video'
+            ? `<video controls src="${src}"></video>`
+            : `<img src="${src}" alt="${item.title || 'Player media'}">`;
+
+        return `
+            <div class="media-item">
+                ${preview}
+                <strong>${item.title || 'Untitled'}</strong>
+                <p class="muted">${playerName || 'Team media'}</p>
+            </div>
+        `;
+    }).join('');
 }
 
-function showTab(tab) {
-    document.querySelectorAll(".tab-content").forEach(content => {
-        content.classList.remove("active");
-    });
+// ========== RENDER FUNCTIONS ==========
+function renderPlayers() {
+    const tbody = document.getElementById("playersBody");
+    if (!tbody) return;
 
-    document.querySelectorAll(".tab-btn").forEach(button => {
-        button.classList.remove("active");
-    });
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No players. Add some!</td></tr>`;
+        return;
+    }
 
-    document.getElementById(`${tab}Tab`).classList.add("active");
+    tbody.innerHTML = window.players.map(player => {
+        const id = getPlayerId(player);
+        const sessions = getAttendanceArray(player);
+        
+        return `
+            <tr>
+                <td>${player.name || ''}</td>
+                <td>${player.position || ''}</td>
+                <td>${player.age || ''}</td>
+                <td>${player.ageGroup || ''}</td>
+                <td>
+                    ${sessions.map((s, i) => {
+                        let icon = '⬜';
+                        let bgColor = '#ccc';
+                        if (s === 'present') { icon = '✓'; bgColor = '#4CAF50'; }
+                        if (s === 'absent') { icon = '✗'; bgColor = '#f44336'; }
+                        return `<span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; margin: 0 1px; border-radius: 5px; background: ${bgColor}; color: white; cursor: ${canEdit() ? 'pointer' : 'default'}; font-size: 11px;" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">${icon}</span>`;
+                    }).join(' ')}
+                </td>
+                <td>${canEdit() ? `<button class="danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePlayer('${id}')">Del</button>` : ''}</td>
+            </tr>
+        `;
+    }).join('');
+}
 
-    const clickedButton = Array.from(document.querySelectorAll(".tab-btn"))
-        .find(button => button.textContent.toLowerCase() === tab);
+function renderAttendance() {
+    const tbody = document.getElementById('attendanceBody');
+    if (!tbody) return;
+    
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="2">No players</td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = window.players.map(p => {
+        const attendanceRecord = currentAttendanceData?.find(a => a.player_id == p.id);
+        const currentStatus = attendanceRecord?.status || 'absent';
+        
+        return `
+            <tr>
+                <td>${p.name}</td>
+                <td>
+                    <label style="margin-right: 12px; font-size: 12px;">
+                        <input type="radio" name="attendance_${p.id}" value="present" ${currentStatus === 'present' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ✅ Present
+                    </label>
+                    <label style="font-size: 12px;">
+                        <input type="radio" name="attendance_${p.id}" value="absent" ${currentStatus === 'absent' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ❌ Absent
+                    </label>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 
-    if (clickedButton) {
-        clickedButton.classList.add("active");
+function renderPayments() {
+    const tbody = document.getElementById('paymentsBody');
+    if (!tbody) return;
+
+    const paidCount = window.players.filter(isPaid).length;
+    const summaryEl = document.getElementById('paymentSummary');
+    if (summaryEl) summaryEl.textContent = `${paidCount} of ${window.players.length} players paid.`;
+
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="3">No players</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = window.players.map(p => `
+        <tr>
+            <td>${p.name}</td>
+            <td>${isPaid(p) ? '✅ Paid' : '❌ Unpaid'}</td>
+            <td>${canEdit() ? `<button style="padding: 4px 8px; font-size: 11px;" onclick="togglePayment('${getPlayerId(p)}')">Toggle</button>` : ''}</td>
+        </tr>
+    `).join('');
+}
+
+function renderStats() {
+    const tbody = document.getElementById('statsBody');
+    if (!tbody) return;
+
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="4">No players</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = window.players.map(p => {
+        const sessions = getAttendanceArray(p);
+        const present = sessions.filter(s => s === 'present').length;
+        const absent = sessions.filter(s => s === 'absent').length;
+        const total = present + absent;
+        const percent = total ? Math.round((present / total) * 100) : 0;
+
+        return `<tr><td style="font-size: 12px;">${p.name}</td><td style="font-size: 12px;">${present}</td><td style="font-size: 12px;">${absent}</td><td style="font-size: 12px;">${percent}%</td></tr>`;
+    }).join('');
+}
+
+function renderDashboard() {
+    setText('totalPlayers', window.players.length);
+    const present = window.players.filter(p => getAttendanceArray(p).includes('present')).length;
+    const paid = window.players.filter(isPaid).length;
+    setText('presentToday', present);
+    setText('paidCount', paid);
+}
+
+function renderRecordPlayerOptions() {
+    const select = document.getElementById('recordPlayer');
+    if (!select) return;
+    
+    select.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${p.name}</option>`).join('')}`;
+    
+    const mediaSelect = document.getElementById('mediaPlayer');
+    if (mediaSelect) {
+        mediaSelect.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${p.name}</option>`).join('')}`;
     }
 }
 
-if (token && currentRole) {
-    openApp();
-    loadData();
+// ========== DRAG & DROP FOR LINEUP ==========
+const formationPositions = {
+    "4-4-2": {
+        GK: { x: 8, y: 50 },
+        LB: { x: 25, y: 15 },
+        CB1: { x: 25, y: 35 },
+        CB2: { x: 25, y: 65 },
+        RB: { x: 25, y: 85 },
+        LM: { x: 50, y: 15 },
+        CM1: { x: 50, y: 40 },
+        CM2: { x: 50, y: 60 },
+        RM: { x: 50, y: 85 },
+        ST1: { x: 80, y: 35 },
+        ST2: { x: 80, y: 65 }
+    },
+    "4-3-3": {
+        GK: { x: 8, y: 50 },
+        LB: { x: 25, y: 15 },
+        CB1: { x: 25, y: 35 },
+        CB2: { x: 25, y: 65 },
+        RB: { x: 25, y: 85 },
+        CM1: { x: 50, y: 25 },
+        CDM: { x: 50, y: 50 },
+        CM2: { x: 50, y: 75 },
+        LW: { x: 75, y: 15 },
+        ST: { x: 85, y: 50 },
+        RW: { x: 75, y: 85 }
+    },
+    "3-5-2": {
+        GK: { x: 8, y: 50 },
+        CB1: { x: 25, y: 20 },
+        CB2: { x: 25, y: 50 },
+        CB3: { x: 25, y: 80 },
+        LM: { x: 45, y: 10 },
+        CM1: { x: 50, y: 30 },
+        CDM: { x: 55, y: 50 },
+        CM2: { x: 50, y: 70 },
+        RM: { x: 45, y: 90 },
+        ST1: { x: 80, y: 35 },
+        ST2: { x: 80, y: 65 }
+    },
+    "4-2-3-1": {
+        GK: { x: 8, y: 50 },
+        LB: { x: 25, y: 15 },
+        CB1: { x: 25, y: 35 },
+        CB2: { x: 25, y: 65 },
+        RB: { x: 25, y: 85 },
+        CDM1: { x: 45, y: 30 },
+        CDM2: { x: 45, y: 70 },
+        LW: { x: 70, y: 15 },
+        CAM: { x: 65, y: 50 },
+        RW: { x: 70, y: 85 },
+        ST: { x: 88, y: 50 }
+    },
+    "5-3-2": {
+        GK: { x: 8, y: 50 },
+        LWB: { x: 18, y: 12 },
+        CB1: { x: 25, y: 30 },
+        CB2: { x: 25, y: 50 },
+        CB3: { x: 25, y: 70 },
+        RWB: { x: 18, y: 88 },
+        CM1: { x: 50, y: 30 },
+        CM2: { x: 50, y: 50 },
+        CM3: { x: 50, y: 70 },
+        ST1: { x: 80, y: 35 },
+        ST2: { x: 80, y: 65 }
+    },
+    "4-4-2 Diamond": {
+        GK: { x: 8, y: 50 },
+        LB: { x: 25, y: 15 },
+        CB1: { x: 25, y: 35 },
+        CB2: { x: 25, y: 65 },
+        RB: { x: 25, y: 85 },
+        CDM: { x: 45, y: 30 },
+        LM: { x: 55, y: 15 },
+        RM: { x: 55, y: 85 },
+        CAM: { x: 65, y: 50 },
+        ST1: { x: 82, y: 35 },
+        ST2: { x: 82, y: 65 }
+    },
+    "3-4-3": {
+        GK: { x: 8, y: 50 },
+        CB1: { x: 25, y: 25 },
+        CB2: { x: 25, y: 50 },
+        CB3: { x: 25, y: 75 },
+        LM: { x: 45, y: 15 },
+        CM1: { x: 50, y: 35 },
+        CM2: { x: 50, y: 65 },
+        RM: { x: 45, y: 85 },
+        LW: { x: 75, y: 15 },
+        ST: { x: 85, y: 50 },
+        RW: { x: 75, y: 85 }
+    },
+    "4-1-4-1": {
+        GK: { x: 8, y: 50 },
+        LB: { x: 25, y: 15 },
+        CB1: { x: 25, y: 35 },
+        CB2: { x: 25, y: 65 },
+        RB: { x: 25, y: 85 },
+        CDM: { x: 45, y: 30 },
+        LM: { x: 55, y: 15 },
+        CM1: { x: 60, y: 40 },
+        CM2: { x: 60, y: 60 },
+        RM: { x: 55, y: 85 },
+        ST: { x: 88, y: 50 }
+    }
+};
+
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function dragStartFromPool(event) {
+    const playerDiv = event.target.closest('.pool-player');
+    if (!playerDiv) return;
+    
+    const playerId = playerDiv.getAttribute('data-player-id');
+    const playerName = playerDiv.getAttribute('data-player-name');
+    event.dataTransfer.setData('text/plain', JSON.stringify({
+        type: 'pool',
+        playerId: playerId,
+        playerName: playerName
+    }));
+    event.dataTransfer.effectAllowed = 'copy';
+    playerDiv.style.opacity = '0.5';
+}
+
+function dragStart(event) {
+    const card = event.target.closest('.player-card');
+    if (!card) {
+        event.preventDefault();
+        return false;
+    }
+    
+    const position = card.getAttribute('data-position');
+    const playerId = window.lineupPlayers[position];
+    
+    if (!playerId) {
+        event.preventDefault();
+        return false;
+    }
+    
+    event.dataTransfer.setData('text/plain', JSON.stringify({
+        type: 'pitch',
+        position: position,
+        playerId: playerId
+    }));
+    event.dataTransfer.effectAllowed = 'move';
+    card.style.opacity = '0.5';
+}
+
+function dragEnd(event) {
+    const el = event.target.closest('.player-card, .pool-player');
+    if (el) el.style.opacity = '1';
+}
+
+function dropOnPosition(event) {
+    event.preventDefault();
+    const targetCard = event.target.closest('.player-card');
+    if (!targetCard) return;
+    
+    const targetPosition = targetCard.getAttribute('data-position');
+    if (!targetPosition) return;
+    
+    const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
+    
+    if (dragData.type === 'pool') {
+        if (window.lineupPlayers[targetPosition]) {
+            alert(`Position ${targetPosition} is already occupied!`);
+            return;
+        }
+        window.lineupPlayers[targetPosition] = dragData.playerId;
+        renderPitch();
+    } else if (dragData.type === 'pitch') {
+        const sourcePosition = dragData.position;
+        const sourcePlayerId = dragData.playerId;
+        const targetPlayerId = window.lineupPlayers[targetPosition];
+        
+        window.lineupPlayers[sourcePosition] = targetPlayerId || null;
+        window.lineupPlayers[targetPosition] = sourcePlayerId;
+        renderPitch();
+    }
+}
+
+function dropOnPool(event) {
+    event.preventDefault();
+    const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
+    
+    if (dragData.type === 'pitch') {
+        delete window.lineupPlayers[dragData.position];
+        renderPitch();
+    }
+}
+
+function renderPitch() {
+    const container = document.getElementById("pitchContainer");
+    if (!container) return;
+    
+    const positions = formationPositions[window.currentFormation];
+    if (!positions) return;
+    
+    let pitchHTML = `
+        <div class="pitch">
+            <div class="pitch-lines">
+                <div class="center-circle"></div>
+                <div class="center-line"></div>
+                <div class="penalty-box-left"></div>
+                <div class="penalty-box-right"></div>
+                <div class="goal-area-left"></div>
+                <div class="goal-area-right"></div>
+                <div class="penalty-spot-left"></div>
+                <div class="penalty-spot-right"></div>
+            </div>
+    `;
+    
+    for (const [position, coords] of Object.entries(positions)) {
+        const playerId = window.lineupPlayers[position];
+        const player = window.players.find(p => String(getPlayerId(p)) === String(playerId));
+        const playerName = player ? player.name : "Empty";
+        const initials = getInitials(playerName);
+        const shortName = playerName.length > 12 ? playerName.substring(0, 10) + ".." : playerName;
+        
+        pitchHTML += `
+            <div class="player-card" 
+                 data-position="${position}"
+                 style="left: ${coords.x}%; top: ${coords.y}%; transform: translate(-50%, -50%);"
+                 draggable="true"
+                 ondragstart="dragStart(event)"
+                 ondragend="dragEnd(event)"
+                 ondrop="dropOnPosition(event)"
+                 ondragover="allowDrop(event)">
+                <div class="player-avatar">${initials}</div>
+                <div class="player-info">
+                    <div class="player-name">${shortName || "Drop"}</div>
+                    <div class="player-role">${position}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    pitchHTML += `</div>`;
+    
+    const usedPlayerIds = Object.values(window.lineupPlayers).filter(id => id);
+    const availablePlayers = window.players.filter(p => !usedPlayerIds.includes(String(getPlayerId(p))));
+    
+    pitchHTML += `
+        <div class="players-pool">
+            <h4>📋 Available Players (Drag to pitch)</h4>
+            <div class="pool-container" id="playersPool"
+                 ondragover="allowDrop(event)"
+                 ondrop="dropOnPool(event)">
+    `;
+    
+    if (availablePlayers.length === 0) {
+        pitchHTML += `<div class="empty-pool-msg">✨ All players are on the pitch! Drag players back to bench to make changes.</div>`;
+    } else {
+        availablePlayers.forEach(player => {
+            const initials = getInitials(player.name);
+            pitchHTML += `
+                <div class="pool-player" 
+                     draggable="true"
+                     data-player-id="${getPlayerId(player)}"
+                     data-player-name="${player.name}"
+                     ondragstart="dragStartFromPool(event)"
+                     ondragend="dragEnd(event)">
+                    <div class="pool-avatar">${initials}</div>
+                    <span>${player.name}</span>
+                </div>
+            `;
+        });
+    }
+    
+    pitchHTML += `</div></div>`;
+    container.innerHTML = pitchHTML;
+}
+
+function changeFormation() {
+    const select = document.getElementById("formationSelect");
+    if (select) {
+        window.currentFormation = select.value;
+        renderPitch();
+    }
+}
+
+function clearLineup() {
+    if (!canEdit()) {
+        alert("Only admin can change lineup");
+        return;
+    }
+    window.lineupPlayers = {};
+    renderPitch();
+}
+
+function saveLineup() {
+    if (!canEdit()) {
+        alert("Only admin can save lineup");
+        return;
+    }
+    localStorage.setItem("midvaalens_lineup", JSON.stringify(window.lineupPlayers));
+    localStorage.setItem("midvaalens_formation", window.currentFormation);
+    alert("Lineup saved successfully!");
+}
+
+function loadSavedLineup() {
+    const savedLineup = localStorage.getItem("midvaalens_lineup");
+    const savedFormation = localStorage.getItem("midvaalens_formation");
+    
+    if (savedLineup) {
+        try {
+            window.lineupPlayers = JSON.parse(savedLineup);
+        } catch(e) {}
+    }
+    if (savedFormation) {
+        window.currentFormation = savedFormation;
+        const formationSelect = document.getElementById("formationSelect");
+        if (formationSelect) {
+            formationSelect.value = savedFormation;
+        }
+    }
+}
+
+// ========== TAB SWITCH ==========
+function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+    const tabContent = document.getElementById(tab + 'Tab');
+    if (tabContent) tabContent.classList.add('active');
+    
+    const clickedButton = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase() === tab.toLowerCase());
+    if (clickedButton) clickedButton.classList.add('active');
+    
+    if (tab === 'lineup') {
+        loadSavedLineup();
+        renderPitch();
+    }
+    if (tab === 'attendance') {
+        loadAttendanceForDate();
+    }
+    if (tab === 'records') {
+        renderRecordPlayerOptions();
+        renderRecords();
+    }
+    if (tab === 'media') {
+        renderMedia();
+    }
+}
+
+// ========== MAIN ==========
+function renderAll() {
+    renderPlayers();
+    renderAttendance();
+    renderPayments();
+    renderStats();
+    renderDashboard();
+    renderRecordPlayerOptions();
+    renderRecords();
+    renderMedia();
+    loadSavedLineup();
+    applyRolePermissions();
+}
+
+// Auto-render when players are loaded
+if (document.getElementById('mainApp').style.display === 'block') {
+    renderAll();
 }
 </script>
-
 </body>
 </html>

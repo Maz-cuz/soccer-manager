@@ -25,7 +25,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased limit for photos
 app.use('/uploads', express.static(uploadsDir));
 
 const mediaStorage = multer.diskStorage({
@@ -102,10 +102,13 @@ function formatPlayer(player) {
         lastName,
         paymentStatus: Number(player.paid) === 1 ? 'paid' : 'unpaid',
         paid: Number(player.paid) === 1,
-        attendance
+        attendance,
+        jerseyNumber: player.jersey_number || null,
+        photoUrl: player.photo_url || null
     };
 }
 
+// ============= GET ALL PLAYERS (UPDATED WITH NEW FIELDS) =============
 app.get('/api/players', (req, res) => {
     const query = `
         SELECT
@@ -136,17 +139,29 @@ app.get('/api/players', (req, res) => {
     });
 });
 
+// ============= ADD PLAYER (UPDATED WITH NEW FIELDS) =============
 app.post('/api/players', (req, res) => {
     const first_name = req.body.first_name || req.body.firstName || '';
     const last_name = req.body.last_name || req.body.lastName || '';
-    const { position, age, division } = req.body;
+    const { position, age, division, jerseyNumber, photoUrl } = req.body;
+
+    // Check if jersey_number column exists, if not add it
+    const addJerseyColumn = `
+        ALTER TABLE players 
+        ADD COLUMN IF NOT EXISTS jersey_number VARCHAR(10),
+        ADD COLUMN IF NOT EXISTS photo_url TEXT
+    `;
+    
+    db.query(addJerseyColumn, (alterErr) => {
+        if (alterErr) console.log('Note: Columns might already exist');
+    });
 
     const query = `
-        INSERT INTO players (first_name, last_name, position, age, division)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO players (first_name, last_name, position, age, division, jersey_number, photo_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(query, [first_name, last_name, position, age || null, division], (err, result) => {
+    db.query(query, [first_name, last_name, position, age || null, division, jerseyNumber || null, photoUrl || null], (err, result) => {
         if (err) {
             console.log('Player add error:', err);
             return res.status(500).json({ error: 'Failed to add player' });
@@ -162,6 +177,8 @@ app.post('/api/players', (req, res) => {
             position,
             age,
             division,
+            jerseyNumber,
+            photoUrl,
             attendance: [null, null, null, null, null],
             paid: false,
             paymentStatus: 'unpaid'
@@ -169,6 +186,7 @@ app.post('/api/players', (req, res) => {
     });
 });
 
+// ============= UPDATE PLAYER (UPDATED WITH NEW FIELDS) =============
 app.put('/api/players/:id', (req, res) => {
     const playerId = req.params.id;
     const updates = [];
@@ -197,6 +215,16 @@ app.put('/api/players/:id', (req, res) => {
     if (req.body.division !== undefined) {
         updates.push('division = ?');
         values.push(req.body.division);
+    }
+
+    if (req.body.jerseyNumber !== undefined) {
+        updates.push('jersey_number = ?');
+        values.push(req.body.jerseyNumber);
+    }
+
+    if (req.body.photoUrl !== undefined) {
+        updates.push('photo_url = ?');
+        values.push(req.body.photoUrl);
     }
 
     const updatePlayerDetails = (callback) => {
@@ -297,6 +325,7 @@ app.put('/api/players/:id', (req, res) => {
     });
 });
 
+// ============= DELETE PLAYER =============
 app.delete('/api/players/:id', (req, res) => {
     db.query('DELETE FROM players WHERE id = ?', [req.params.id], (err) => {
         if (err) {
@@ -308,6 +337,99 @@ app.delete('/api/players/:id', (req, res) => {
     });
 });
 
+// ============= ATTENDANCE BY SPECIFIC DATE (NEW) =============
+app.get('/api/attendance/date/:date', (req, res) => {
+    const { date } = req.params;
+    
+    const query = `
+        SELECT 
+            attendance.id,
+            attendance.player_id,
+            players.first_name,
+            players.last_name,
+            attendance.attendance_date,
+            attendance.status
+        FROM attendance
+        JOIN players ON attendance.player_id = players.id
+        WHERE attendance.attendance_date = ?
+        ORDER BY players.first_name ASC
+    `;
+
+    db.query(query, [date], (err, results) => {
+        if (err) {
+            console.log('Attendance by date fetch error:', err);
+            return res.status(500).json({ error: 'Failed to fetch attendance' });
+        }
+
+        res.json(results);
+    });
+});
+
+// ============= SAVE ATTENDANCE FOR SPECIFIC DATE (NEW) =============
+app.post('/api/attendance/save', (req, res) => {
+    const { date, records } = req.body;
+    
+    if (!date || !Array.isArray(records)) {
+        return res.status(400).json({ error: 'Invalid request' });
+    }
+    
+    let completed = 0;
+    let hasError = false;
+    
+    records.forEach(record => {
+        const query = `
+            INSERT INTO attendance (player_id, attendance_date, status)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE status = VALUES(status)
+        `;
+        
+        db.query(query, [record.playerId, date, record.status], (err) => {
+            if (err) {
+                console.log('Attendance save error:', err);
+                hasError = true;
+            }
+            completed++;
+            
+            if (completed === records.length) {
+                if (hasError) {
+                    res.status(500).json({ error: 'Failed to save some attendance records' });
+                } else {
+                    res.json({ message: 'Attendance saved successfully', date });
+                }
+            }
+        });
+    });
+    
+    if (records.length === 0) {
+        res.json({ message: 'No records to save' });
+    }
+});
+
+// ============= GET ATTENDANCE HISTORY FOR PLAYER (NEW) =============
+app.get('/api/attendance/history/:playerId', (req, res) => {
+    const { playerId } = req.params;
+    
+    const query = `
+        SELECT 
+            attendance_date,
+            status
+        FROM attendance
+        WHERE player_id = ?
+        ORDER BY attendance_date DESC
+        LIMIT 30
+    `;
+
+    db.query(query, [playerId], (err, results) => {
+        if (err) {
+            console.log('Attendance history fetch error:', err);
+            return res.status(500).json({ error: 'Failed to fetch attendance history' });
+        }
+
+        res.json(results);
+    });
+});
+
+// ============= AUTO CREATE ATTENDANCE FOR TODAY (UNMARKED = ABSENT) =============
 app.post('/api/attendance/auto', (req, res) => {
     const query = `
         INSERT IGNORE INTO attendance (player_id, attendance_date, status)
@@ -324,6 +446,7 @@ app.post('/api/attendance/auto', (req, res) => {
     });
 });
 
+// ============= MARK INDIVIDUAL ATTENDANCE =============
 app.post('/api/attendance/mark', (req, res) => {
     const { player_id, status } = req.body;
 
@@ -343,6 +466,7 @@ app.post('/api/attendance/mark', (req, res) => {
     });
 });
 
+// ============= GET ALL ATTENDANCE RECORDS =============
 app.get('/api/attendance', (req, res) => {
     const query = `
         SELECT 
@@ -367,6 +491,7 @@ app.get('/api/attendance', (req, res) => {
     });
 });
 
+// ============= PAYMENTS =============
 app.get('/api/payments', (req, res) => {
     const query = `
         SELECT 
@@ -427,6 +552,7 @@ app.post('/api/payments/pay', (req, res) => {
     });
 });
 
+// ============= STATS =============
 app.get('/api/stats', (req, res) => {
     const query = `
         SELECT 
@@ -469,6 +595,7 @@ app.post('/api/stats/update', (req, res) => {
     });
 });
 
+// ============= PLAYER RECORDS =============
 app.get('/api/player-records', (req, res) => {
     const query = `
         SELECT
@@ -568,6 +695,7 @@ app.get('/api/player-records/recent', (req, res) => {
     });
 });
 
+// ============= PLAYER MEDIA =============
 app.get('/api/player-media', (req, res) => {
     const query = `
         SELECT
@@ -630,6 +758,24 @@ app.post('/api/player-media', uploadMedia.single('file'), (req, res) => {
     );
 });
 
+// ============= DATABASE MIGRATION FOR NEW COLUMNS =============
+app.post('/api/migrate', (req, res) => {
+    const addJerseyColumn = `
+        ALTER TABLE players 
+        ADD COLUMN IF NOT EXISTS jersey_number VARCHAR(10),
+        ADD COLUMN IF NOT EXISTS photo_url TEXT
+    `;
+    
+    db.query(addJerseyColumn, (err) => {
+        if (err) {
+            console.log('Migration error:', err);
+            return res.status(500).json({ error: 'Migration failed', details: err.message });
+        }
+        
+        res.json({ message: 'Database migration completed successfully' });
+    });
+});
+
 app.use((req, res) => {
     res.status(404).json({
         error: 'Route not found',
@@ -641,4 +787,5 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Admin password: ${process.env.ADMIN_PASSWORD || 'admin123'}`);
 });
