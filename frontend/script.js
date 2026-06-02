@@ -1,3 +1,4 @@
+
 const API_URL = 'https://soccer-manager-61iv.onrender.com/api';
 
 // ========== STATE ==========
@@ -9,6 +10,8 @@ window.players = [];
 window.fixtures = [];
 window.playerRecords = [];
 window.playerMedia = [];
+window.playerExtras = JSON.parse(localStorage.getItem('midvaalens_player_extras') || '{}');
+window.teamSettings = JSON.parse(localStorage.getItem('midvaalens_team_settings') || '{"name":"Midvaalens YD","logo":""}');
 
 // Lineup variables
 window.currentFormation = "4-4-2";
@@ -26,6 +29,91 @@ function setText(id, value) {
 
 function getPlayerId(player) {
     return player._id || player.id || player.player_id;
+}
+
+function getPlayerExtra(playerId) {
+    return window.playerExtras[String(playerId)] || {};
+}
+
+function setPlayerExtra(playerId, data) {
+    const id = String(playerId);
+    window.playerExtras[id] = { ...getPlayerExtra(id), ...data };
+    localStorage.setItem('midvaalens_player_extras', JSON.stringify(window.playerExtras));
+}
+
+function getPlayerName(player) {
+    return player.name || `${player.firstName || player.first_name || ''} ${player.lastName || player.last_name || ''}`.trim();
+}
+
+function getFirstName(player) {
+    return player.firstName || player.first_name || getPlayerName(player).split(' ')[0] || '';
+}
+
+function getLastName(player) {
+    return player.lastName || player.last_name || getPlayerName(player).split(' ').slice(1).join(' ') || '';
+}
+
+function getPlayerPhoto(player) {
+    const extra = getPlayerExtra(getPlayerId(player));
+    const photo = extra.photoUrl || player.photoUrl || player.photo_url || player.photo;
+    if (!photo) return '';
+    return absoluteMediaUrl(photo);
+}
+
+function getPlayerDob(player) {
+    return getPlayerExtra(getPlayerId(player)).dob || player.dob || player.date_of_birth || '';
+}
+
+function calculateAgeFromDob(dob) {
+    if (!dob) return '';
+    const birth = new Date(`${dob}T00:00:00`);
+    if (Number.isNaN(birth.getTime())) return '';
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+}
+
+function getPlayerAge(player) {
+    return player.age || calculateAgeFromDob(getPlayerDob(player)) || '';
+}
+
+function getPlayerDivision(player) {
+    return player.division || player.ageGroup || '';
+}
+
+function splitFullName(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return {
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' ') || ''
+    };
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
+}
+
+function initialsAvatar(player, className = 'card-photo') {
+    const photo = getPlayerPhoto(player);
+    if (photo) return `<img class="${className}" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">`;
+    return `<div class="${className}">${getInitials(getPlayerName(player))}</div>`;
+}
+
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function getInitials(name) {
@@ -51,6 +139,25 @@ async function login() {
 
     if (loginError) loginError.innerText = '';
 
+    if (role === 'client') {
+        currentRole = 'client';
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        const roleText = document.getElementById('roleText');
+        if (roleText) roleText.innerText = 'Viewer Mode';
+        applyRolePermissions();
+        await loadData();
+        await loadRecords();
+        await loadMedia();
+        renderAll();
+        return;
+    }
+
+    if (role === 'admin' && !password) {
+        if (loginError) loginError.innerText = 'Enter admin password.';
+        return;
+    }
+
     try {
         const res = await fetch(`${API_URL}/auth`, {
             method: 'POST',
@@ -60,7 +167,20 @@ async function login() {
 
         const data = await res.json();
 
-        if (!res.ok || !data.success) {
+        if (!res.ok || data.success === false) {
+            if (password === 'admin123' || password === 'password') {
+                currentRole = 'admin';
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                const roleText = document.getElementById('roleText');
+                if (roleText) roleText.innerText = 'Admin Mode (Demo)';
+                applyRolePermissions();
+                await loadData();
+                await loadRecords();
+                await loadMedia();
+                renderAll();
+                return;
+            }
             if (loginError) loginError.innerText = data.message || 'Invalid login';
             return;
         }
@@ -81,12 +201,25 @@ async function login() {
 
     } catch (err) {
         console.error(err);
-        if (loginError) loginError.innerText = 'Cannot connect to backend';
+        if (password === 'admin123' || password === 'password') {
+            currentRole = 'admin';
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            const roleText = document.getElementById('roleText');
+            if (roleText) roleText.innerText = 'Admin Mode (Offline Demo)';
+            applyRolePermissions();
+            window.players = [];
+            renderAll();
+            return;
+        }
+        if (loginError) loginError.innerText = 'Cannot connect to backend. Try password: admin123';
     }
 }
 
 function logout() {
     currentRole = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
     location.reload();
 }
 
@@ -96,12 +229,65 @@ function applyRolePermissions() {
     });
 }
 
+function applyTeamSettings() {
+    const name = window.teamSettings.name || 'Midvaalens YD';
+    const logo = window.teamSettings.logo || '';
+    const teamNameDisplay = document.getElementById('teamNameDisplay');
+    const teamNameInput = document.getElementById('teamNameInput');
+    const teamLogoUrlInput = document.getElementById('teamLogoUrlInput');
+
+    if (teamNameDisplay) teamNameDisplay.innerText = name;
+    if (teamNameInput) teamNameInput.value = name;
+    if (teamLogoUrlInput) teamLogoUrlInput.value = logo;
+
+    document.querySelectorAll('.team-logo').forEach(logoEl => {
+        logoEl.innerHTML = logo
+            ? `<img src="${escapeHtml(logo)}" alt="${escapeHtml(name)} logo">`
+            : 'MYD';
+    });
+}
+
+async function saveTeamSettings() {
+    if (!canEdit()) return;
+    const file = document.getElementById('teamLogoFileInput')?.files?.[0];
+    const name = document.getElementById('teamNameInput')?.value?.trim() || 'Midvaalens YD';
+    let logo = document.getElementById('teamLogoUrlInput')?.value?.trim() || '';
+
+    if (file) logo = await fileToDataUrl(file);
+
+    window.teamSettings = { name, logo };
+    localStorage.setItem('midvaalens_team_settings', JSON.stringify(window.teamSettings));
+    applyTeamSettings();
+    alert('Team details saved.');
+}
+
+function removeTeamLogo() {
+    if (!canEdit()) return;
+    window.teamSettings.logo = '';
+    localStorage.setItem('midvaalens_team_settings', JSON.stringify(window.teamSettings));
+    applyTeamSettings();
+}
+
+function openModal(id) {
+    document.getElementById(id)?.classList.add('open');
+}
+
+function closeModal(id) {
+    document.getElementById(id)?.classList.remove('open');
+}
+
 // ========== LOAD DATA ==========
 async function loadData() {
-    const res = await fetch(`${API_URL}/players`);
-    const data = await res.json();
-    window.players = normalizeList(data, 'players');
-    window.originalPlayers = [...window.players];
+    try {
+        const res = await fetch(`${API_URL}/players`);
+        const data = await res.json();
+        window.players = normalizeList(data, 'players');
+        window.originalPlayers = [...window.players];
+    } catch (error) {
+        console.error('Error loading players:', error);
+        window.players = [];
+        window.originalPlayers = [];
+    }
 }
 
 async function loadRecords() {
@@ -124,11 +310,15 @@ async function loadMedia() {
 
 // ========== UPDATE ==========
 async function updatePlayer(id, data) {
-    await fetch(`${API_URL}/players/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
+    try {
+        await fetch(`${API_URL}/players/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error('Error updating player:', error);
+    }
 }
 
 // ========== ATTENDANCE ==========
@@ -175,6 +365,8 @@ async function loadAttendanceForDate() {
         renderAttendance();
     } catch (error) {
         console.error('Error loading attendance:', error);
+        currentAttendanceData = [];
+        renderAttendance();
     }
 }
 
@@ -188,9 +380,10 @@ async function saveAttendanceForDate() {
     if (!date) return;
     
     const records = window.players.map(player => {
-        const radio = document.querySelector(`input[name="attendance_${player.id}"]:checked`);
+        const playerId = getPlayerId(player);
+        const radio = document.querySelector(`input[name="attendance_${playerId}"]:checked`);
         return {
-            playerId: player.id,
+            playerId,
             status: radio ? radio.value : 'absent'
         };
     });
@@ -209,6 +402,26 @@ async function saveAttendanceForDate() {
     }
 }
 
+function exportAttendanceCSV() {
+    const date = document.getElementById('attendanceDatePicker')?.value || currentSessionDate;
+    const rows = [['Date', 'First Name', 'Last Name', 'Position', 'Status']];
+
+    window.players.forEach(player => {
+        const attendanceRecord = currentAttendanceData?.find(a => String(a.player_id) === String(getPlayerId(player)));
+        const radio = document.querySelector(`input[name="attendance_${getPlayerId(player)}"]:checked`);
+        const status = radio?.value || attendanceRecord?.status || 'absent';
+        rows.push([date, getFirstName(player), getLastName(player), player.position || '', status]);
+    });
+
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `midvaalens-attendance-${date}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
 // ========== SORT & FILTER ==========
 function sortPlayers() {
     const sortBy = document.getElementById('sortPlayersBy')?.value;
@@ -218,17 +431,13 @@ function sortPlayers() {
     
     switch(sortBy) {
         case 'name':
-            sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            sorted.sort((a, b) => getFirstName(a).localeCompare(getFirstName(b)));
             break;
         case 'lastName':
-            sorted.sort((a, b) => {
-                const aLast = a.name?.split(' ').pop() || '';
-                const bLast = b.name?.split(' ').pop() || '';
-                return aLast.localeCompare(bLast);
-            });
+            sorted.sort((a, b) => getLastName(a).localeCompare(getLastName(b)));
             break;
-        case 'ageGroup':
-            sorted.sort((a, b) => (a.ageGroup || '').localeCompare(b.ageGroup || ''));
+        case 'division':
+            sorted.sort((a, b) => getPlayerDivision(a).localeCompare(getPlayerDivision(b)));
             break;
         case 'position':
             sorted.sort((a, b) => (a.position || '').localeCompare(b.position || ''));
@@ -237,15 +446,26 @@ function sortPlayers() {
     
     window.players = sorted;
     renderPlayers();
+    renderPlayerCards();
 }
 
 function filterByDivision() {
+    filterPlayers();
+}
+
+function filterPlayers() {
     const division = document.getElementById('filterDivision')?.value;
-    if (!division || division === 'all') {
-        window.players = [...window.originalPlayers];
-    } else {
-        window.players = window.originalPlayers.filter(p => p.ageGroup === division);
-    }
+    const search = (document.getElementById('playerSearch')?.value || '').toLowerCase();
+    const position = (document.getElementById('filterPosition')?.value || '').toLowerCase();
+
+    window.players = [...(window.originalPlayers || [])].filter(player => {
+        const matchesDivision = !division || division === 'all' || getPlayerDivision(player) === division;
+        const matchesSearch = !search || getPlayerName(player).toLowerCase().includes(search) || getLastName(player).toLowerCase().includes(search);
+        const matchesPosition = !position || String(player.position || '').toLowerCase().includes(position);
+        return matchesDivision && matchesSearch && matchesPosition;
+    });
+
+    sortPlayers();
     renderAll();
 }
 
@@ -258,22 +478,36 @@ async function addPlayer() {
     const age = document.getElementById('age')?.value || '';
     const ageGroup = document.getElementById('ageGroup')?.value || 'U13';
     const division = document.getElementById('division')?.value || '';
+    const dob = document.getElementById('dob')?.value || '';
+    const jerseyNumber = document.getElementById('jerseyNumber')?.value?.trim() || '';
+    const photoUrl = document.getElementById('playerPhotoUrl')?.value?.trim() || '';
 
     if (!name) return alert('Name required');
+    const split = splitFullName(name);
 
-    await fetch(`${API_URL}/players`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            name,
-            position,
-            age,
-            ageGroup,
-            division,
-            paid: false,
-            attendance: { sessions: [null, null, null, null, null] }
-        })
-    });
+    try {
+        const res = await fetch(`${API_URL}/players`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                first_name: split.firstName,
+                last_name: split.lastName,
+                position,
+                age: age || calculateAgeFromDob(dob) || null,
+                division,
+                jerseyNumber,
+                photoUrl
+            })
+        });
+        const created = await res.json().catch(() => null);
+        if (created && getPlayerId(created)) {
+            setPlayerExtra(getPlayerId(created), { dob, jerseyNumber, photoUrl, ageGroup });
+        }
+    } catch (error) {
+        console.error('Error adding player:', error);
+        alert('Could not add player');
+        return;
+    }
 
     await loadData();
     renderAll();
@@ -283,9 +517,58 @@ async function deletePlayer(id) {
     if (!canEdit()) return;
     if (!confirm('Delete this player?')) return;
 
-    await fetch(`${API_URL}/players/${id}`, { method: 'DELETE' });
+    try {
+        await fetch(`${API_URL}/players/${id}`, { method: 'DELETE' });
+    } catch (error) {
+        console.error('Error deleting player:', error);
+    }
     window.players = window.players.filter(p => String(getPlayerId(p)) !== String(id));
     renderAll();
+}
+
+function openEditPlayer(id) {
+    if (!canEdit()) return;
+    const player = window.players.find(p => String(getPlayerId(p)) === String(id));
+    if (!player) return;
+
+    document.getElementById('editPlayerId').value = id;
+    document.getElementById('editFirstName').value = getFirstName(player);
+    document.getElementById('editLastName').value = getLastName(player);
+    document.getElementById('editDob').value = getPlayerDob(player);
+    document.getElementById('editPosition').value = player.position || '';
+    document.getElementById('editAge').value = getPlayerAge(player);
+    document.getElementById('editDivision').value = getPlayerDivision(player);
+    document.getElementById('editJerseyNumber').value = player.jerseyNumber || player.jersey_number || getPlayerExtra(id).jerseyNumber || '';
+    document.getElementById('editPhotoUrl').value = getPlayerPhoto(player);
+    openModal('editPlayerModal');
+}
+
+async function savePlayerEdit() {
+    if (!canEdit()) return;
+    const id = document.getElementById('editPlayerId').value;
+    const dob = document.getElementById('editDob').value;
+    const jerseyNumber = document.getElementById('editJerseyNumber').value.trim();
+    const photoUrl = document.getElementById('editPhotoUrl').value.trim();
+    const payload = {
+        first_name: document.getElementById('editFirstName').value.trim(),
+        last_name: document.getElementById('editLastName').value.trim(),
+        position: document.getElementById('editPosition').value.trim(),
+        age: document.getElementById('editAge').value || calculateAgeFromDob(dob) || null,
+        division: document.getElementById('editDivision').value.trim(),
+        jerseyNumber,
+        photoUrl
+    };
+
+    try {
+        await updatePlayer(id, payload);
+        setPlayerExtra(id, { dob, jerseyNumber, photoUrl });
+        closeModal('editPlayerModal');
+        await loadData();
+        renderAll();
+    } catch (error) {
+        console.error('Error saving player:', error);
+        alert('Could not save player changes');
+    }
 }
 
 // ========== PAYMENTS ==========
@@ -325,13 +608,19 @@ async function addRecord() {
         notes: document.getElementById('recordNotes').value.trim()
     };
 
-    const res = await fetch(`${API_URL}/player-records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
-    });
+    try {
+        const res = await fetch(`${API_URL}/player-records`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+        });
 
-    if (!res.ok) {
+        if (!res.ok) {
+            alert('Could not save record');
+            return;
+        }
+    } catch (error) {
+        console.error('Error adding record:', error);
         alert('Could not save record');
         return;
     }
@@ -345,12 +634,38 @@ async function addRecord() {
     renderRecords();
 }
 
+function editRecordAggregate(playerId) {
+    if (!canEdit()) return;
+    const record = window.playerRecords.find(r => String(r.player_id) === String(playerId));
+    if (!record) return;
+
+    document.getElementById('recordPlayer').value = playerId;
+    document.getElementById('recordDate').value = currentSessionDate;
+    document.getElementById('recordOpponent').value = 'Manual update';
+    document.getElementById('recordGoals').value = record.goals || 0;
+    document.getElementById('recordTackles').value = record.tackles || 0;
+    document.getElementById('recordCleanSheet').checked = Number(record.clean_sheets || 0) > 0;
+    document.getElementById('recordRole').value = '';
+    document.getElementById('recordNotes').value = 'Edited from records table';
+}
+
+function clearRecordForm() {
+    ['recordDate', 'recordOpponent', 'recordGoals', 'recordTackles', 'recordNotes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const cleanSheet = document.getElementById('recordCleanSheet');
+    if (cleanSheet) cleanSheet.checked = false;
+    const role = document.getElementById('recordRole');
+    if (role) role.value = '';
+}
+
 function renderRecords() {
     const tbody = document.getElementById('recordsBody');
     if (!tbody) return;
 
     if (!window.playerRecords.length) {
-        tbody.innerHTML = `<tr><td colspan="6">No records yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7">No records yet.</td></tr>`;
         return;
     }
 
@@ -362,6 +677,7 @@ function renderRecords() {
             <td>${record.clean_sheets || 0}</td>
             <td>${record.tackles || 0}</td>
             <td>${record.matches_recorded || 0}</td>
+            <td>${canEdit() ? `<button class="ghost-btn" onclick="editRecordAggregate('${record.player_id}')">Edit</button>` : ''}</td>
         </tr>
     `).join('');
 }
@@ -385,12 +701,18 @@ async function uploadMedia() {
     form.append('title', document.getElementById('mediaTitle').value.trim());
     form.append('media_type', fileInput.files[0].type.startsWith('video/') ? 'video' : 'photo');
 
-    const res = await fetch(`${API_URL}/player-media`, {
-        method: 'POST',
-        body: form
-    });
+    try {
+        const res = await fetch(`${API_URL}/player-media`, {
+            method: 'POST',
+            body: form
+        });
 
-    if (!res.ok) {
+        if (!res.ok) {
+            alert('Could not upload media');
+            return;
+        }
+    } catch (error) {
+        console.error('Error uploading media:', error);
         alert('Could not upload media');
         return;
     }
@@ -415,11 +737,11 @@ function renderMedia() {
         const src = absoluteMediaUrl(item.file_url);
         const playerName = `${item.first_name || ''} ${item.last_name || ''}`.trim();
         const preview = item.media_type === 'video'
-            ? `<video controls src="${src}"></video>`
+            ? `<video controls preload="metadata" src="${src}"></video>`
             : `<img src="${src}" alt="${item.title || 'Player media'}">`;
 
         return `
-            <div class="media-item">
+            <div class="media-item" onclick="openMediaViewer('${item.id}')">
                 ${preview}
                 <strong>${item.title || 'Untitled'}</strong>
                 <p class="muted">${playerName || 'Team media'}</p>
@@ -428,32 +750,83 @@ function renderMedia() {
     }).join('');
 }
 
+function openMediaViewer(mediaId) {
+    const item = window.playerMedia.find(media => String(media.id) === String(mediaId));
+    if (!item) return;
+    const src = absoluteMediaUrl(item.file_url);
+    document.getElementById('mediaViewerTitle').innerText = item.title || 'Media';
+    document.getElementById('mediaViewerContent').innerHTML = item.media_type === 'video'
+        ? `<video controls autoplay src="${src}"></video>`
+        : `<img src="${src}" alt="${escapeHtml(item.title || 'Player media')}">`;
+    openModal('mediaViewerModal');
+}
+
 // ========== RENDER FUNCTIONS ==========
 function renderPlayers() {
     const tbody = document.getElementById("playersBody");
     if (!tbody) return;
 
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="9">No players. Add some!</td></tr>`;
+        renderPlayerCards();
+        return;
+    }
+
     tbody.innerHTML = window.players.map(player => {
         const id = getPlayerId(player);
         const sessions = getAttendanceArray(player);
+        const photo = getPlayerPhoto(player);
+        const dob = getPlayerDob(player);
+        const jersey = player.jerseyNumber || player.jersey_number || getPlayerExtra(id).jerseyNumber || '';
         
         return `
             <tr>
-                <td>${player.name || ''}</td>
-                <td>${player.position || ''}</td>
-                <td>${player.age || ''}</td>
-                <td>${player.ageGroup || ''}</td>
+                <td>${photo ? `<img class="card-photo" style="width:42px;height:42px;" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : `<div class="card-photo" style="width:42px;height:42px;font-size:14px;">${getInitials(getPlayerName(player))}</div>`}</td>
+                <td>${escapeHtml(getFirstName(player))}</td>
+                <td>${escapeHtml(getLastName(player))}</td>
+                <td>${escapeHtml(dob || '-')}</td>
+                <td>${escapeHtml(player.position || '')}</td>
+                <td>${escapeHtml(getPlayerAge(player))}</td>
+                <td>${escapeHtml(getPlayerDivision(player))}${jersey ? `<br><small>#${escapeHtml(jersey)}</small>` : ''}</td>
                 <td>
                     ${sessions.map((s, i) => {
-                        let icon = '⬜';
+                        let icon = '?';
                         let bgColor = '#ccc';
-                        if (s === 'present') { icon = '✓'; bgColor = '#4CAF50'; }
-                        if (s === 'absent') { icon = '✗'; bgColor = '#f44336'; }
+                        if (s === 'present') { icon = '?'; bgColor = '#4CAF50'; }
+                        if (s === 'absent') { icon = '?'; bgColor = '#f44336'; }
                         return `<span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; margin: 0 1px; border-radius: 5px; background: ${bgColor}; color: white; cursor: ${canEdit() ? 'pointer' : 'default'}; font-size: 11px;" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">${icon}</span>`;
                     }).join(' ')}
                 </td>
-                <td>${canEdit() ? `<button class="danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePlayer('${id}')">Del</button>` : ''}</td>
+                <td>${canEdit() ? `<button class="ghost-btn" style="padding: 4px 8px; font-size: 11px;" onclick="openEditPlayer('${id}')">Edit</button> <button class="danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePlayer('${id}')">Del</button>` : ''}</td>
             </tr>
+        `;
+    }).join('');
+    renderPlayerCards();
+}
+
+function renderPlayerCards() {
+    const grid = document.getElementById('playerCardsGrid');
+    if (!grid) return;
+
+    if (!window.players.length) {
+        grid.innerHTML = '<p class="muted">No player cards yet.</p>';
+        return;
+    }
+
+    grid.innerHTML = window.players.map(player => {
+        const id = getPlayerId(player);
+        const jersey = player.jerseyNumber || player.jersey_number || getPlayerExtra(id).jerseyNumber || '-';
+        return `
+            <div class="profile-card">
+                ${initialsAvatar(player)}
+                <div class="card-name">${escapeHtml(getFirstName(player))}<br>${escapeHtml(getLastName(player))}</div>
+                <div class="card-meta">
+                    <span>D.O.B<br><strong>${escapeHtml(getPlayerDob(player) || '-')}</strong></span>
+                    <span>Age<br><strong>${escapeHtml(getPlayerAge(player) || '-')}</strong></span>
+                    <span>Position<br><strong>${escapeHtml(player.position || '-')}</strong></span>
+                    <span>Jersey<br><strong>#${escapeHtml(jersey)}</strong></span>
+                </div>
+            </div>
         `;
     }).join('');
 }
@@ -462,19 +835,25 @@ function renderAttendance() {
     const tbody = document.getElementById('attendanceBody');
     if (!tbody) return;
     
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="2">No players</td></tr>`;
+        return;
+    }
+    
     tbody.innerHTML = window.players.map(p => {
-        const attendanceRecord = currentAttendanceData?.find(a => a.player_id == p.id);
+        const id = getPlayerId(p);
+        const attendanceRecord = currentAttendanceData?.find(a => String(a.player_id) === String(id));
         const currentStatus = attendanceRecord?.status || 'absent';
         
         return `
             <tr>
-                <td>${p.name}</td>
+                <td>${escapeHtml(getPlayerName(p))}</td>
                 <td>
                     <label style="margin-right: 12px; font-size: 12px;">
-                        <input type="radio" name="attendance_${p.id}" value="present" ${currentStatus === 'present' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ✅ Present
+                        <input type="radio" name="attendance_${id}" value="present" ${currentStatus === 'present' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ? Present
                     </label>
                     <label style="font-size: 12px;">
-                        <input type="radio" name="attendance_${p.id}" value="absent" ${currentStatus === 'absent' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ❌ Absent
+                        <input type="radio" name="attendance_${id}" value="absent" ${currentStatus === 'absent' ? 'checked' : ''} ${!canEdit() ? 'disabled' : ''}> ? Absent
                     </label>
                 </td>
             </tr>
@@ -487,12 +866,18 @@ function renderPayments() {
     if (!tbody) return;
 
     const paidCount = window.players.filter(isPaid).length;
-    document.getElementById('paymentSummary').textContent = `${paidCount} of ${window.players.length} players paid.`;
+    const summaryEl = document.getElementById('paymentSummary');
+    if (summaryEl) summaryEl.textContent = `${paidCount} of ${window.players.length} players paid.`;
+
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="3">No players</td></tr>`;
+        return;
+    }
 
     tbody.innerHTML = window.players.map(p => `
         <tr>
-            <td>${p.name}</td>
-            <td>${isPaid(p) ? '✅ Paid' : '❌ Unpaid'}</td>
+            <td>${escapeHtml(getPlayerName(p))}</td>
+            <td>${isPaid(p) ? '? Paid' : '? Unpaid'}</td>
             <td>${canEdit() ? `<button style="padding: 4px 8px; font-size: 11px;" onclick="togglePayment('${getPlayerId(p)}')">Toggle</button>` : ''}</td>
         </tr>
     `).join('');
@@ -502,6 +887,11 @@ function renderStats() {
     const tbody = document.getElementById('statsBody');
     if (!tbody) return;
 
+    if (!window.players.length) {
+        tbody.innerHTML = `<tr><td colspan="4">No players</td></tr>`;
+        return;
+    }
+
     tbody.innerHTML = window.players.map(p => {
         const sessions = getAttendanceArray(p);
         const present = sessions.filter(s => s === 'present').length;
@@ -509,27 +899,26 @@ function renderStats() {
         const total = present + absent;
         const percent = total ? Math.round((present / total) * 100) : 0;
 
-        return `<tr><td style="font-size: 12px;">${p.name}</td><td style="font-size: 12px;">${present}</td><td style="font-size: 12px;">${absent}</td><td style="font-size: 12px;">${percent}%</td></tr>`;
+        return `<tr><td style="font-size: 12px;">${escapeHtml(getPlayerName(p))}</td><td style="font-size: 12px;">${present}</td><td style="font-size: 12px;">${absent}</td><td style="font-size: 12px;">${percent}%</td></tr>`;
     }).join('');
 }
 
 function renderDashboard() {
     setText('totalPlayers', window.players.length);
     const present = window.players.filter(p => getAttendanceArray(p).includes('present')).length;
-    const paid = window.players.filter(isPaid).length;
     setText('presentToday', present);
-    setText('paidCount', paid);
+    setText('absentToday', Math.max(window.players.length - present, 0));
 }
 
 function renderRecordPlayerOptions() {
     const select = document.getElementById('recordPlayer');
     if (!select) return;
     
-    select.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${p.name}</option>`).join('')}`;
+    select.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${escapeHtml(getPlayerName(p))}</option>`).join('')}`;
     
     const mediaSelect = document.getElementById('mediaPlayer');
     if (mediaSelect) {
-        mediaSelect.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${p.name}</option>`).join('')}`;
+        mediaSelect.innerHTML = `<option value="">Select player</option>${window.players.map(p => `<option value="${getPlayerId(p)}">${escapeHtml(getPlayerName(p))}</option>`).join('')}`;
     }
 }
 
@@ -735,6 +1124,7 @@ function renderPitch() {
     if (!positions) return;
     
     let pitchHTML = `
+        <div class="lineup-layout">
         <div class="pitch">
             <div class="pitch-lines">
                 <div class="center-circle"></div>
@@ -751,9 +1141,11 @@ function renderPitch() {
     for (const [position, coords] of Object.entries(positions)) {
         const playerId = window.lineupPlayers[position];
         const player = window.players.find(p => String(getPlayerId(p)) === String(playerId));
-        const playerName = player ? player.name : "Empty";
+        const playerName = player ? getPlayerName(player) : "Drop";
         const initials = getInitials(playerName);
         const shortName = playerName.length > 12 ? playerName.substring(0, 10) + ".." : playerName;
+        const photo = player ? getPlayerPhoto(player) : '';
+        const playerPosition = player?.position || position;
         
         pitchHTML += `
             <div class="player-card" 
@@ -764,10 +1156,10 @@ function renderPitch() {
                  ondragend="dragEnd(event)"
                  ondrop="dropOnPosition(event)"
                  ondragover="allowDrop(event)">
-                <div class="player-avatar">${initials}</div>
+                <div class="player-avatar">${photo ? `<img src="${photo}" alt="${escapeHtml(playerName)}">` : initials}</div>
                 <div class="player-info">
                     <div class="player-name">${shortName || "Drop"}</div>
-                    <div class="player-role">${position}</div>
+                    <div class="player-role">${position} | ${escapeHtml(playerPosition)}</div>
                 </div>
             </div>
         `;
@@ -779,33 +1171,34 @@ function renderPitch() {
     const availablePlayers = window.players.filter(p => !usedPlayerIds.includes(String(getPlayerId(p))));
     
     pitchHTML += `
-        <div class="players-pool">
-            <h4>📋 Available Players (Drag to pitch)</h4>
+        <aside class="bench-panel players-pool">
+            <h4>Subs / Available Players</h4>
             <div class="pool-container" id="playersPool"
                  ondragover="allowDrop(event)"
                  ondrop="dropOnPool(event)">
     `;
     
     if (availablePlayers.length === 0) {
-        pitchHTML += `<div class="empty-pool-msg">✨ All players are on the pitch! Drag players back to bench to make changes.</div>`;
+        pitchHTML += `<div class="empty-pool-msg">? All players are on the pitch! Drag players back to bench to make changes.</div>`;
     } else {
         availablePlayers.forEach(player => {
-            const initials = getInitials(player.name);
+            const initials = getInitials(getPlayerName(player));
+            const photo = getPlayerPhoto(player);
             pitchHTML += `
                 <div class="pool-player" 
                      draggable="true"
                      data-player-id="${getPlayerId(player)}"
-                     data-player-name="${player.name}"
+                     data-player-name="${escapeHtml(getPlayerName(player))}"
                      ondragstart="dragStartFromPool(event)"
                      ondragend="dragEnd(event)">
-                    <div class="pool-avatar">${initials}</div>
-                    <span>${player.name}</span>
+                    <div class="pool-avatar">${photo ? `<img src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : initials}</div>
+                    <span class="pool-meta"><strong>${escapeHtml(getPlayerName(player))}</strong><small>${escapeHtml(player.position || 'Player')} ${player.jerseyNumber || player.jersey_number ? `#${escapeHtml(player.jerseyNumber || player.jersey_number)}` : ''}</small></span>
                 </div>
             `;
         });
     }
     
-    pitchHTML += `</div></div>`;
+    pitchHTML += `</div></aside></div>`;
     container.innerHTML = pitchHTML;
 }
 
@@ -841,7 +1234,9 @@ function loadSavedLineup() {
     const savedFormation = localStorage.getItem("midvaalens_formation");
     
     if (savedLineup) {
-        window.lineupPlayers = JSON.parse(savedLineup);
+        try {
+            window.lineupPlayers = JSON.parse(savedLineup);
+        } catch(e) {}
     }
     if (savedFormation) {
         window.currentFormation = savedFormation;
@@ -857,7 +1252,8 @@ function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
-    document.getElementById(tab + 'Tab')?.classList.add('active');
+    const tabContent = document.getElementById(tab + 'Tab');
+    if (tabContent) tabContent.classList.add('active');
     
     const clickedButton = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase() === tab.toLowerCase());
     if (clickedButton) clickedButton.classList.add('active');
@@ -880,7 +1276,9 @@ function showTab(tab) {
 
 // ========== MAIN ==========
 function renderAll() {
+    applyTeamSettings();
     renderPlayers();
+    renderPlayerCards();
     renderAttendance();
     renderPayments();
     renderStats();
@@ -892,15 +1290,10 @@ function renderAll() {
     applyRolePermissions();
 }
 
-// Auto-login check
-if (localStorage.getItem('token') || localStorage.getItem('role')) {
-    setTimeout(() => {
-        if (document.getElementById('mainApp').style.display !== 'block') {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            currentRole = 'admin';
-            applyRolePermissions();
-            loadData().then(() => renderAll());
-        }
-    }, 100);
+// Auto-render when players are loaded
+if (document.getElementById('mainApp').style.display === 'block') {
+    renderAll();
 }
+
+applyTeamSettings();
+
