@@ -124,12 +124,6 @@ function fileToDataUrl(file) {
     });
 }
 
-function initialsAvatar(player, className = 'card-photo') {
-    const photo = getPlayerPhoto(player);
-    if (photo) return `<img class="${className}" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">`;
-    return `<div class="${className}">${getInitials(getPlayerName(player))}</div>`;
-}
-
 function normalizeList(data, key) {
     if (Array.isArray(data)) return data;
     if (data && Array.isArray(data[key])) return data[key];
@@ -249,13 +243,98 @@ async function openCameraForEdit(playerId) {
     await openCamera();
 }
 
+// ========== PHOTO UPLOAD FOR EXISTING PLAYERS ==========
+async function uploadPhotoFromEdit() {
+    if (!canEdit()) return;
+    
+    const playerId = document.getElementById('editPlayerId').value;
+    if (!playerId) {
+        alert('Please save player info first');
+        return;
+    }
+    
+    const fileInput = document.getElementById('editPhotoFile');
+    if (!fileInput.files.length) {
+        alert('Please select a photo first');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    const uploadBtn = event.target;
+    const originalText = uploadBtn.innerText;
+    uploadBtn.innerText = 'Uploading...';
+    uploadBtn.disabled = true;
+    
+    try {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const photoDataUrl = event.target.result;
+            await savePlayerPhoto(playerId, photoDataUrl);
+            alert('Photo uploaded successfully!');
+            fileInput.value = '';
+            await loadData();
+            renderAll();
+            
+            // Refresh the preview
+            const player = window.players.find(p => String(getPlayerId(p)) === String(playerId));
+            if (player) {
+                const previewDiv = document.getElementById('editPhotoPreview');
+                if (previewDiv) {
+                    previewDiv.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <img src="${getPlayerPhoto(player)}" class="photo-preview" alt="Player photo">
+                            <button onclick="removeCurrentPhoto()" class="danger" style="padding: 4px 12px; font-size: 12px;">Remove Photo</button>
+                        </div>
+                    `;
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    } catch (error) {
+        console.error('Error uploading photo:', error);
+        alert('Failed to upload photo');
+    } finally {
+        uploadBtn.innerText = originalText;
+        uploadBtn.disabled = false;
+    }
+}
+
+async function removeCurrentPhoto() {
+    if (!canEdit()) return;
+    
+    const playerId = document.getElementById('editPlayerId').value;
+    if (!playerId) return;
+    
+    if (!confirm('Remove this player\'s photo?')) return;
+    
+    try {
+        await updatePlayer(playerId, { photoUrl: null });
+        setPlayerExtra(playerId, { photoUrl: null });
+        
+        const previewDiv = document.getElementById('editPhotoPreview');
+        if (previewDiv) {
+            previewDiv.innerHTML = '<p class="muted">No photo. Select a photo above to upload.</p>';
+        }
+        
+        const fileInput = document.getElementById('editPhotoFile');
+        if (fileInput) fileInput.value = '';
+        
+        alert('Photo removed successfully!');
+        await loadData();
+        renderAll();
+    } catch (error) {
+        console.error('Error removing photo:', error);
+        alert('Failed to remove photo');
+    }
+}
+
 // ========== AUTH ==========
 async function login() {
     const role = document.getElementById('roleSelect').value;
     const password = document.getElementById('adminPassword').value;
     const loginBtn = document.querySelector('#loginOverlay button');
     const loginError = document.getElementById('loginError');
-
+    
     const original = loginBtn.innerText;
     loginBtn.innerText = 'Logging in...';
     loginBtn.disabled = true;
@@ -288,16 +367,14 @@ async function login() {
     } catch (err) {
         if (loginError) loginError.innerText = err.message;
         alert(err.message);
+    } finally {
+        loginBtn.innerText = original;
+        loginBtn.disabled = false;
     }
-
-    loginBtn.innerText = original;
-    loginBtn.disabled = false;
 }
 
 function logout() {
     currentRole = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
     location.reload();
 }
 
@@ -649,6 +726,26 @@ function openEditPlayer(id) {
     document.getElementById('editDivision').value = getPlayerDivision(player);
     document.getElementById('editJerseyNumber').value = player.jerseyNumber || player.jersey_number || getPlayerExtra(id).jerseyNumber || '';
     
+    // Show current photo in preview
+    const currentPhoto = getPlayerPhoto(player);
+    const previewDiv = document.getElementById('editPhotoPreview');
+    if (previewDiv) {
+        if (currentPhoto) {
+            previewDiv.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <img src="${currentPhoto}" class="photo-preview" alt="Current photo">
+                    <button onclick="removeCurrentPhoto()" class="danger" style="padding: 4px 12px; font-size: 12px;">Remove Photo</button>
+                </div>
+            `;
+        } else {
+            previewDiv.innerHTML = '<p class="muted">No photo uploaded yet. Select a photo above.</p>';
+        }
+    }
+    
+    // Clear file input
+    const fileInput = document.getElementById('editPhotoFile');
+    if (fileInput) fileInput.value = '';
+    
     openModal('editPlayerModal');
 }
 
@@ -777,7 +874,7 @@ function renderRecords() {
     }
 
     tbody.innerHTML = window.playerRecords.map(record => `
-        <tr>
+        <table>
             <td>${`${record.first_name || ''} ${record.last_name || ''}`.trim()}</td>
             <td>${record.position || ''}</td>
             <td>${record.goals || 0}</td>
@@ -882,7 +979,7 @@ function renderPlayers() {
         
         return `
             <tr>
-                <td>${photo ? `<img class="card-photo" style="width:42px;height:42px;" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : `<div class="card-photo" style="width:42px;height:42px;font-size:14px;">${getInitials(getPlayerName(player))}</div>`}</td>
+                <td>${photo ? `<img class="card-photo" style="width:42px;height:42px;border-radius:50%;object-fit:cover;" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : `<div style="width:42px;height:42px;border-radius:50%;background:#ccc;display:flex;align-items:center;justify-content:center;font-size:14px;">${getInitials(getPlayerName(player))}</div>`}</td>
                 <td>${escapeHtml(getFirstName(player))}</td>
                 <td>${escapeHtml(getLastName(player))}</td>
                 <td>${escapeHtml(dob || '-')}</td>
@@ -891,15 +988,11 @@ function renderPlayers() {
                 <td>${escapeHtml(getPlayerDivision(player))}${jersey ? `<br><small>#${escapeHtml(jersey)}</small>` : ''}</td>
                 <td>
                     ${sessions.map((s, i) => {
-                        if (s === 'present') {
-                            return `<span class="attendance-icon-present" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">✓</span>`;
-                        } else if (s === 'absent') {
-                            return `<span class="attendance-icon-absent" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">✗</span>`;
-                        } else {
-                            return `<span class="attendance-icon-empty" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">◻️</span>`;
-                        }
+                        if (s === 'present') return `<span class="attendance-icon-present" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">✓</span>`;
+                        else if (s === 'absent') return `<span class="attendance-icon-absent" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">✗</span>`;
+                        else return `<span class="attendance-icon-empty" onclick="${canEdit() ? `toggleAttendance('${id}',${i})` : ''}">◻️</span>`;
                     }).join(' ')}
-                </td>
+                 </td>
                 <td>${canEdit() ? `<button class="ghost-btn" style="padding: 4px 8px; font-size: 11px;" onclick="openEditPlayer('${id}')">Edit</button> <button class="danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePlayer('${id}')">Del</button>` : ''}</td>
             </tr>
         `;
@@ -919,9 +1012,10 @@ function renderPlayerCards() {
     grid.innerHTML = window.players.map(player => {
         const id = getPlayerId(player);
         const jersey = player.jerseyNumber || player.jersey_number || getPlayerExtra(id).jerseyNumber || '-';
+        const photo = getPlayerPhoto(player);
         return `
             <div class="profile-card">
-                ${initialsAvatar(player)}
+                ${photo ? `<img class="card-photo-img" src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : `<div class="card-photo">${getInitials(getPlayerName(player))}</div>`}
                 <div class="card-name">${escapeHtml(getFirstName(player))}<br>${escapeHtml(getLastName(player))}</div>
                 <div class="card-meta">
                     <span>D.O.B<br><strong>${escapeHtml(getPlayerDob(player) || '-')}</strong></span>
@@ -1027,128 +1121,16 @@ function renderRecordPlayerOptions() {
     }
 }
 
-// ========== RENDER ALL ==========
-function renderAll() {
-    applyTeamSettings();
-    renderPlayers();
-    renderPlayerCards();
-    renderAttendance();
-    renderPayments();
-    renderStats();
-    renderDashboard();
-    renderRecordPlayerOptions();
-    renderRecords();
-    renderMedia();
-    loadSavedLineup();
-    applyRolePermissions();
-}
-
-// ========== LINEUP FUNCTIONS ==========
+// ========== DRAG & DROP FOR LINEUP ==========
 const formationPositions = {
-    "4-4-2": {
-        GK: { x: 8, y: 50 },
-        LB: { x: 25, y: 15 },
-        CB1: { x: 25, y: 35 },
-        CB2: { x: 25, y: 65 },
-        RB: { x: 25, y: 85 },
-        LM: { x: 50, y: 15 },
-        CM1: { x: 50, y: 40 },
-        CM2: { x: 50, y: 60 },
-        RM: { x: 50, y: 85 },
-        ST1: { x: 80, y: 35 },
-        ST2: { x: 80, y: 65 }
-    },
-    "4-3-3": {
-        GK: { x: 8, y: 50 },
-        LB: { x: 25, y: 15 },
-        CB1: { x: 25, y: 35 },
-        CB2: { x: 25, y: 65 },
-        RB: { x: 25, y: 85 },
-        CM1: { x: 50, y: 25 },
-        CDM: { x: 50, y: 50 },
-        CM2: { x: 50, y: 75 },
-        LW: { x: 75, y: 15 },
-        ST: { x: 85, y: 50 },
-        RW: { x: 75, y: 85 }
-    },
-    "3-5-2": {
-        GK: { x: 8, y: 50 },
-        CB1: { x: 25, y: 20 },
-        CB2: { x: 25, y: 50 },
-        CB3: { x: 25, y: 80 },
-        LM: { x: 45, y: 10 },
-        CM1: { x: 50, y: 30 },
-        CDM: { x: 55, y: 50 },
-        CM2: { x: 50, y: 70 },
-        RM: { x: 45, y: 90 },
-        ST1: { x: 80, y: 35 },
-        ST2: { x: 80, y: 65 }
-    },
-    "4-2-3-1": {
-        GK: { x: 8, y: 50 },
-        LB: { x: 25, y: 15 },
-        CB1: { x: 25, y: 35 },
-        CB2: { x: 25, y: 65 },
-        RB: { x: 25, y: 85 },
-        CDM1: { x: 45, y: 30 },
-        CDM2: { x: 45, y: 70 },
-        LW: { x: 70, y: 15 },
-        CAM: { x: 65, y: 50 },
-        RW: { x: 70, y: 85 },
-        ST: { x: 88, y: 50 }
-    },
-    "5-3-2": {
-        GK: { x: 8, y: 50 },
-        LWB: { x: 18, y: 12 },
-        CB1: { x: 25, y: 30 },
-        CB2: { x: 25, y: 50 },
-        CB3: { x: 25, y: 70 },
-        RWB: { x: 18, y: 88 },
-        CM1: { x: 50, y: 30 },
-        CM2: { x: 50, y: 50 },
-        CM3: { x: 50, y: 70 },
-        ST1: { x: 80, y: 35 },
-        ST2: { x: 80, y: 65 }
-    },
-    "4-4-2 Diamond": {
-        GK: { x: 8, y: 50 },
-        LB: { x: 25, y: 15 },
-        CB1: { x: 25, y: 35 },
-        CB2: { x: 25, y: 65 },
-        RB: { x: 25, y: 85 },
-        CDM: { x: 45, y: 30 },
-        LM: { x: 55, y: 15 },
-        RM: { x: 55, y: 85 },
-        CAM: { x: 65, y: 50 },
-        ST1: { x: 82, y: 35 },
-        ST2: { x: 82, y: 65 }
-    },
-    "3-4-3": {
-        GK: { x: 8, y: 50 },
-        CB1: { x: 25, y: 25 },
-        CB2: { x: 25, y: 50 },
-        CB3: { x: 25, y: 75 },
-        LM: { x: 45, y: 15 },
-        CM1: { x: 50, y: 35 },
-        CM2: { x: 50, y: 65 },
-        RM: { x: 45, y: 85 },
-        LW: { x: 75, y: 15 },
-        ST: { x: 85, y: 50 },
-        RW: { x: 75, y: 85 }
-    },
-    "4-1-4-1": {
-        GK: { x: 8, y: 50 },
-        LB: { x: 25, y: 15 },
-        CB1: { x: 25, y: 35 },
-        CB2: { x: 25, y: 65 },
-        RB: { x: 25, y: 85 },
-        CDM: { x: 45, y: 30 },
-        LM: { x: 55, y: 15 },
-        CM1: { x: 60, y: 40 },
-        CM2: { x: 60, y: 60 },
-        RM: { x: 55, y: 85 },
-        ST: { x: 88, y: 50 }
-    }
+    "4-4-2": { GK: { x: 8, y: 50 }, LB: { x: 25, y: 15 }, CB1: { x: 25, y: 35 }, CB2: { x: 25, y: 65 }, RB: { x: 25, y: 85 }, LM: { x: 50, y: 15 }, CM1: { x: 50, y: 40 }, CM2: { x: 50, y: 60 }, RM: { x: 50, y: 85 }, ST1: { x: 80, y: 35 }, ST2: { x: 80, y: 65 } },
+    "4-3-3": { GK: { x: 8, y: 50 }, LB: { x: 25, y: 15 }, CB1: { x: 25, y: 35 }, CB2: { x: 25, y: 65 }, RB: { x: 25, y: 85 }, CM1: { x: 50, y: 25 }, CDM: { x: 50, y: 50 }, CM2: { x: 50, y: 75 }, LW: { x: 75, y: 15 }, ST: { x: 85, y: 50 }, RW: { x: 75, y: 85 } },
+    "3-5-2": { GK: { x: 8, y: 50 }, CB1: { x: 25, y: 20 }, CB2: { x: 25, y: 50 }, CB3: { x: 25, y: 80 }, LM: { x: 45, y: 10 }, CM1: { x: 50, y: 30 }, CDM: { x: 55, y: 50 }, CM2: { x: 50, y: 70 }, RM: { x: 45, y: 90 }, ST1: { x: 80, y: 35 }, ST2: { x: 80, y: 65 } },
+    "4-2-3-1": { GK: { x: 8, y: 50 }, LB: { x: 25, y: 15 }, CB1: { x: 25, y: 35 }, CB2: { x: 25, y: 65 }, RB: { x: 25, y: 85 }, CDM1: { x: 45, y: 30 }, CDM2: { x: 45, y: 70 }, LW: { x: 70, y: 15 }, CAM: { x: 65, y: 50 }, RW: { x: 70, y: 85 }, ST: { x: 88, y: 50 } },
+    "5-3-2": { GK: { x: 8, y: 50 }, LWB: { x: 18, y: 12 }, CB1: { x: 25, y: 30 }, CB2: { x: 25, y: 50 }, CB3: { x: 25, y: 70 }, RWB: { x: 18, y: 88 }, CM1: { x: 50, y: 30 }, CM2: { x: 50, y: 50 }, CM3: { x: 50, y: 70 }, ST1: { x: 80, y: 35 }, ST2: { x: 80, y: 65 } },
+    "4-4-2 Diamond": { GK: { x: 8, y: 50 }, LB: { x: 25, y: 15 }, CB1: { x: 25, y: 35 }, CB2: { x: 25, y: 65 }, RB: { x: 25, y: 85 }, CDM: { x: 45, y: 30 }, LM: { x: 55, y: 15 }, RM: { x: 55, y: 85 }, CAM: { x: 65, y: 50 }, ST1: { x: 82, y: 35 }, ST2: { x: 82, y: 65 } },
+    "3-4-3": { GK: { x: 8, y: 50 }, CB1: { x: 25, y: 25 }, CB2: { x: 25, y: 50 }, CB3: { x: 25, y: 75 }, LM: { x: 45, y: 15 }, CM1: { x: 50, y: 35 }, CM2: { x: 50, y: 65 }, RM: { x: 45, y: 85 }, LW: { x: 75, y: 15 }, ST: { x: 85, y: 50 }, RW: { x: 75, y: 85 } },
+    "4-1-4-1": { GK: { x: 8, y: 50 }, LB: { x: 25, y: 15 }, CB1: { x: 25, y: 35 }, CB2: { x: 25, y: 65 }, RB: { x: 25, y: 85 }, CDM: { x: 45, y: 30 }, LM: { x: 55, y: 15 }, CM1: { x: 60, y: 40 }, CM2: { x: 60, y: 60 }, RM: { x: 55, y: 85 }, ST: { x: 88, y: 50 } }
 };
 
 function allowDrop(event) { event.preventDefault(); }
@@ -1229,50 +1211,16 @@ function renderPitch() {
     const usedPlayerIds = Object.values(window.lineupPlayers).filter(id => id);
     const availablePlayers = window.players.filter(p => !usedPlayerIds.includes(String(getPlayerId(p))));
     pitchHTML += `<aside class="bench-panel players-pool"><h4>Subs / Available Players</h4><div class="pool-container" ondragover="allowDrop(event)" ondrop="dropOnPool(event)">`;
-    if (availablePlayers.length === 0) {
-        pitchHTML += `<div class="empty-pool-msg">✨ All players are on the pitch! Drag players back to bench to make changes.</div>`;
-    } else {
-        availablePlayers.forEach(player => {
-            const initials = getInitials(getPlayerName(player));
-            const photo = getPlayerPhoto(player);
-            pitchHTML += `<div class="pool-player" draggable="true" data-player-id="${getPlayerId(player)}" data-player-name="${escapeHtml(getPlayerName(player))}" ondragstart="dragStartFromPool(event)" ondragend="dragEnd(event)"><div class="pool-avatar">${photo ? `<img src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : initials}</div><span class="pool-meta"><strong>${escapeHtml(getPlayerName(player))}</strong><small>${escapeHtml(player.position || 'Player')} ${player.jerseyNumber || player.jersey_number ? `#${escapeHtml(player.jerseyNumber || player.jersey_number)}` : ''}</small></span></div>`;
-        });
-    }
+    if (availablePlayers.length === 0) { pitchHTML += `<div class="empty-pool-msg">✨ All players are on the pitch! Drag players back to bench to make changes.</div>`; } 
+    else { availablePlayers.forEach(player => { const initials = getInitials(getPlayerName(player)); const photo = getPlayerPhoto(player); pitchHTML += `<div class="pool-player" draggable="true" data-player-id="${getPlayerId(player)}" data-player-name="${escapeHtml(getPlayerName(player))}" ondragstart="dragStartFromPool(event)" ondragend="dragEnd(event)"><div class="pool-avatar">${photo ? `<img src="${photo}" alt="${escapeHtml(getPlayerName(player))}">` : initials}</div><span class="pool-meta"><strong>${escapeHtml(getPlayerName(player))}</strong><small>${escapeHtml(player.position || 'Player')} ${player.jerseyNumber || player.jersey_number ? `#${escapeHtml(player.jerseyNumber || player.jersey_number)}` : ''}</small></span></div>`; }); }
     pitchHTML += `</div></aside></div>`;
     container.innerHTML = pitchHTML;
 }
 
-function changeFormation() {
-    const select = document.getElementById("formationSelect");
-    if (select) {
-        window.currentFormation = select.value;
-        renderPitch();
-    }
-}
-
-function clearLineup() {
-    if (!canEdit()) { alert("Only admin can change lineup"); return; }
-    window.lineupPlayers = {};
-    renderPitch();
-}
-
-function saveLineup() {
-    if (!canEdit()) { alert("Only admin can save lineup"); return; }
-    localStorage.setItem("midvaalens_lineup", JSON.stringify(window.lineupPlayers));
-    localStorage.setItem("midvaalens_formation", window.currentFormation);
-    alert("Lineup saved successfully!");
-}
-
-function loadSavedLineup() {
-    const savedLineup = localStorage.getItem("midvaalens_lineup");
-    const savedFormation = localStorage.getItem("midvaalens_formation");
-    if (savedLineup) { try { window.lineupPlayers = JSON.parse(savedLineup); } catch(e) {} }
-    if (savedFormation) {
-        window.currentFormation = savedFormation;
-        const formationSelect = document.getElementById("formationSelect");
-        if (formationSelect) { formationSelect.value = savedFormation; }
-    }
-}
+function changeFormation() { const select = document.getElementById("formationSelect"); if (select) { window.currentFormation = select.value; renderPitch(); } }
+function clearLineup() { if (!canEdit()) { alert("Only admin can change lineup"); return; } window.lineupPlayers = {}; renderPitch(); }
+function saveLineup() { if (!canEdit()) { alert("Only admin can save lineup"); return; } localStorage.setItem("midvaalens_lineup", JSON.stringify(window.lineupPlayers)); localStorage.setItem("midvaalens_formation", window.currentFormation); alert("Lineup saved successfully!"); }
+function loadSavedLineup() { const savedLineup = localStorage.getItem("midvaalens_lineup"); const savedFormation = localStorage.getItem("midvaalens_formation"); if (savedLineup) { try { window.lineupPlayers = JSON.parse(savedLineup); } catch(e) {} } if (savedFormation) { window.currentFormation = savedFormation; const formationSelect = document.getElementById("formationSelect"); if (formationSelect) { formationSelect.value = savedFormation; } } }
 
 // ========== TAB SWITCH ==========
 function showTab(tab) {
@@ -1289,6 +1237,21 @@ function showTab(tab) {
 }
 
 // ========== INITIALIZATION ==========
+function renderAll() {
+    applyTeamSettings();
+    renderPlayers();
+    renderPlayerCards();
+    renderAttendance();
+    renderPayments();
+    renderStats();
+    renderDashboard();
+    renderRecordPlayerOptions();
+    renderRecords();
+    renderMedia();
+    loadSavedLineup();
+    applyRolePermissions();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const photoFileInput = document.getElementById('playerPhotoFile');
     if (photoFileInput) {
@@ -1307,6 +1270,5 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTeamSettings();
 });
 
-if (document.getElementById('mainApp').style.display === 'block') {
-    renderAll();
-}
+if (document.getElementById('mainApp').style.display === 'block') { renderAll(); }
+applyTeamSettings();
