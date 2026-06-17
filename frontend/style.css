@@ -100,7 +100,9 @@ body {
     display: block;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     width: 100%;
     margin-top: 8px;
     padding: 10px;
@@ -144,7 +146,8 @@ textarea {
     padding: 8px;
 }
 
-.media-item img, .media-item video {
+.media-item img,
+.media-item video {
     width: 100%;
     max-height: 220px;
     border-radius: 6px;
@@ -157,7 +160,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     font-size: 13px;
@@ -265,7 +269,7 @@ button:disabled {
     border-radius: 15px;
     border: 2px solid white;
     overflow: visible;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Grass pattern */
@@ -276,13 +280,11 @@ button:disabled {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: repeating-linear-gradient(
-        90deg,
-        rgba(255,255,255,0.05) 0px,
-        rgba(255,255,255,0.05) 2px,
-        transparent 2px,
-        transparent 15px
-    );
+    background-image: repeating-linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0px,
+            rgba(255, 255, 255, 0.05) 2px,
+            transparent 2px,
+            transparent 15px);
     pointer-events: none;
     border-radius: 15px;
 }
@@ -304,7 +306,7 @@ button:disabled {
     left: 8px;
     right: 8px;
     bottom: 8px;
-    border: 1.5px solid rgba(255,255,255,0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
     border-radius: 6px;
 }
 
@@ -315,7 +317,7 @@ button:disabled {
     left: 50%;
     width: 50px;
     height: 50px;
-    border: 1.5px solid rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     transform: translate(-50%, -50%);
 }
@@ -327,7 +329,7 @@ button:disabled {
     left: 50%;
     width: 1.5px;
     height: calc(100% - 16px);
-    background: rgba(255,255,255,0.6);
+    background: rgba(255, 255, 255, 0.6);
 }
 
 /* Penalty boxes */
@@ -337,7 +339,7 @@ button:disabled {
     top: 50%;
     width: 60px;
     height: 100px;
-    border: 1.5px solid rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
     border-left: none;
     transform: translateY(-50%);
 }
@@ -348,7 +350,7 @@ button:disabled {
     top: 50%;
     width: 60px;
     height: 100px;
-    border: 1.5px solid rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
     border-right: none;
     transform: translateY(-50%);
 }
@@ -360,7 +362,7 @@ button:disabled {
     top: 50%;
     width: 25px;
     height: 50px;
-    border: 1.5px solid rgba(255,255,255,0.4);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
     border-left: none;
     transform: translateY(-50%);
 }
@@ -371,7 +373,7 @@ button:disabled {
     top: 50%;
     width: 25px;
     height: 50px;
-    border: 1.5px solid rgba(255,255,255,0.4);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
     border-right: none;
     transform: translateY(-50%);
 }
@@ -383,7 +385,7 @@ button:disabled {
     top: 50%;
     width: 4px;
     height: 4px;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     transform: translateY(-50%);
 }
@@ -394,7 +396,7 @@ button:disabled {
     top: 50%;
     width: 4px;
     height: 4px;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     transform: translateY(-50%);
 }
@@ -410,11 +412,11 @@ button:disabled {
     text-align: center;
     font-size: 8px;
     font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
     z-index: 10;
     min-width: 55px;
-    border: 1.5px solid rgba(255,215,0,0.6);
+    border: 1.5px solid rgba(255, 215, 0, 0.6);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -434,7 +436,7 @@ button:disabled {
     transform: scale(1.05);
     background: linear-gradient(135deg, #227a9e, #12526b);
     border-color: #ffd700;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
 .player-avatar {
@@ -449,6 +451,13 @@ button:disabled {
     font-weight: bold;
     color: #1a5f7a;
     flex-shrink: 0;
+}
+
+.player-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .player-info {
@@ -531,6 +540,13 @@ button:disabled {
     font-weight: bold;
 }
 
+.pool-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .empty-pool-msg {
     color: #888;
     padding: 10px;
@@ -569,7 +585,8 @@ button:disabled {
     .dashboard {
         grid-template-columns: 1fr;
     }
-    th, td {
+    th,
+    td {
         padding: 6px;
         font-size: 11px;
     }
@@ -615,16 +632,22 @@ body {
 }
 
 @keyframes appRise {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .header {
     background: rgba(7, 26, 61, 0.72);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 18px;
     padding: 14px;
-    box-shadow: 0 16px 38px rgba(0,0,0,0.22);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
 }
 
 .team-banner h1 {
@@ -651,20 +674,26 @@ body {
 }
 
 .stat {
-    background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(239,246,255,0.94));
-    border: 1px solid rgba(255,255,255,0.55);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.94));
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
 .card {
     border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
     animation: cardIn 0.28s ease both;
 }
 
 @keyframes cardIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .ghost-btn {
@@ -695,9 +724,9 @@ body {
     overflow: hidden;
     background:
         linear-gradient(150deg, rgba(7, 26, 61, 0.95), rgba(0, 83, 58, 0.92)),
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 8px, transparent 8px 16px);
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0 8px, transparent 8px 16px);
     border: 1px solid rgba(247, 209, 84, 0.42);
-    box-shadow: 0 16px 34px rgba(0,0,0,0.2);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
 }
 
 .profile-card::after {
@@ -724,6 +753,14 @@ body {
     font-weight: 900;
 }
 
+.card-photo-img {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+}
+
 .card-name {
     margin-top: 10px;
     font-size: 18px;
@@ -739,7 +776,7 @@ body {
 }
 
 .card-meta span {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 9px;
     padding: 7px;
 }
@@ -755,7 +792,7 @@ body {
     max-width: none;
     height: 560px;
     background:
-        linear-gradient(90deg, rgba(255,255,255,0.05) 0 8%, transparent 8% 16%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 8%, transparent 8% 16%),
         linear-gradient(145deg, #238647, #125c33);
 }
 
@@ -766,7 +803,7 @@ body {
     border-radius: 14px;
     flex-direction: column;
     gap: 3px;
-    background: rgba(7,26,61,0.92);
+    background: rgba(7, 26, 61, 0.92);
     border: 2px solid var(--gold);
 }
 
@@ -800,12 +837,12 @@ body {
 }
 
 .bench-panel {
-    background: rgba(7,26,61,0.9);
+    background: rgba(7, 26, 61, 0.9);
     color: white;
     border-radius: 14px;
     padding: 12px;
     min-height: 560px;
-    border: 1px solid rgba(247,209,84,0.35);
+    border: 1px solid rgba(247, 209, 84, 0.35);
 }
 
 .bench-panel h4 {
@@ -821,7 +858,7 @@ body {
 
 .pool-player {
     justify-content: flex-start;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .pool-meta {
@@ -841,10 +878,11 @@ body {
 
 .media-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.14);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14);
 }
 
-.media-item img, .media-item video {
+.media-item img,
+.media-item video {
     height: 190px;
 }
 
@@ -871,7 +909,7 @@ body {
     color: #111;
     border-radius: 18px;
     padding: 18px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
 .modal-head {
@@ -897,11 +935,11 @@ body {
 }
 
 .photo-preview {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--gold);
+    border: 3px solid var(--gold);
 }
 
 .photo-preview-small {
@@ -915,7 +953,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: rgba(0,0,0,0.95);
+    background: rgba(0, 0, 0, 0.95);
     display: none;
     flex-direction: column;
     align-items: center;
@@ -1009,13 +1047,14 @@ body {
     }
 }
 
-/* Add to your CSS file */
+/* Login overlay styles */
 #loginOverlay button:disabled {
     opacity: 0.6;
     cursor: wait;
 }
 
-.login-box input, .login-box select {
+.login-box input,
+.login-box select {
     margin-bottom: 12px;
 }
 
@@ -1026,4 +1065,38 @@ body {
     border-radius: 6px;
     font-size: 12px;
     white-space: pre-line;
+}
+
+/* Additional fix for attendance icons in table */
+td .attendance-icon-present,
+td .attendance-icon-absent,
+td .attendance-icon-empty {
+    display: inline-block;
+    margin: 2px;
+}
+
+/* Fix for player card photo in table */
+td .card-photo {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+}
+
+/* Make sure modals work properly on mobile */
+@media (max-width: 600px) {
+    .modal-card {
+        padding: 12px;
+        margin: 10px;
+    }
+    
+    .modal-head h3 {
+        font-size: 16px;
+    }
+    
+    .photo-preview {
+        width: 70px;
+        height: 70px;
+    }
 }

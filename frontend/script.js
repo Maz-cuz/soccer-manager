@@ -864,6 +864,7 @@ function clearRecordForm() {
     if (role) role.value = '';
 }
 
+// ========== FIXED: RENDER RECORDS ==========
 function renderRecords() {
     const tbody = document.getElementById('recordsBody');
     if (!tbody) return;
@@ -874,7 +875,7 @@ function renderRecords() {
     }
 
     tbody.innerHTML = window.playerRecords.map(record => `
-        <table>
+        <tr>
             <td>${`${record.first_name || ''} ${record.last_name || ''}`.trim()}</td>
             <td>${record.position || ''}</td>
             <td>${record.goals || 0}</td>
@@ -1272,3 +1273,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (document.getElementById('mainApp').style.display === 'block') { renderAll(); }
 applyTeamSettings();
+
+// ========== RESET WEEKLY ATTENDANCE ==========
+async function resetWeeklyAttendance() {
+    if (!canEdit()) {
+        alert('Only admin can reset attendance');
+        return;
+    }
+    
+    // Confirm with the user
+    if (!confirm('⚠️ This will clear ALL attendance records for the current week. Are you sure?')) {
+        return;
+    }
+    
+    // Double confirm for safety
+    if (!confirm('⚠️ FINAL WARNING: This action cannot be undone. Clear all attendance data?')) {
+        return;
+    }
+    
+    try {
+        // Get current date to determine the week
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+        
+        // Format dates for display
+        const startStr = startOfWeek.toISOString().split('T')[0];
+        const endStr = endOfWeek.toISOString().split('T')[0];
+        
+        // Reset all players' attendance sessions
+        for (const player of window.players) {
+            // Reset attendance sessions to empty (null)
+            if (player.attendance && player.attendance.sessions) {
+                player.attendance.sessions = [null, null, null, null, null];
+            } else {
+                player.attendance = { sessions: [null, null, null, null, null] };
+            }
+            
+            // Update the player in the database
+            await updatePlayer(getPlayerId(player), { 
+                attendance: player.attendance 
+            });
+        }
+        
+        // Also clear any saved attendance records for this week
+        try {
+            // Clear attendance records from the server for this week
+            const response = await fetch(`${API_URL}/attendance/clear-week`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    start_date: startStr, 
+                    end_date: endStr 
+                })
+            });
+            
+            if (!response.ok) {
+                console.warn('Server clear failed, but local attendance was reset');
+            }
+        } catch (error) {
+            console.warn('Could not clear server attendance, but local attendance was reset');
+        }
+        
+        // Refresh the attendance display
+        await loadAttendanceForDate();
+        renderAll();
+        
+        alert(`✅ Attendance has been reset for the week (${startStr} to ${endStr})`);
+        
+    } catch (error) {
+        console.error('Error resetting attendance:', error);
+        alert('❌ Failed to reset attendance. Please try again.');
+    }
+}
+
+// Alternative: Reset attendance for a specific week
+async function resetAttendanceForWeek(year, weekNumber) {
+    if (!canEdit()) return;
+    
+    // Calculate the start and end dates of the week
+    const startDate = new Date(year, 0, 1 + (weekNumber - 1) * 7);
+    const dayOfWeek = startDate.getDay();
+    const startOffset = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+    startDate.setDate(startDate.getDate() + startOffset);
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    
+    // Reset all players' attendance for that week
+    for (const player of window.players) {
+        if (player.attendance && player.attendance.sessions) {
+            player.attendance.sessions = [null, null, null, null, null];
+        }
+        await updatePlayer(getPlayerId(player), { 
+            attendance: player.attendance 
+        });
+    }
+    
+    await loadAttendanceForDate();
+    renderAll();
+    alert(`✅ Attendance reset for week ${weekNumber} (${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]})`);
+}
